@@ -7,8 +7,23 @@
   "engines": {
     "vscode": "^1.82.0"
   },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/vdhoangson/vscode-php-namespace-resolver"
+  },
+  "bugs": {
+    "url": "https://github.com/vdhoangson/vscode-php-namespace-resolver/issues"
+  },
   "categories": [
-    "Other"
+    "Programming Languages"
+  ],
+  "keywords": [
+    "php",
+    "namespace",
+    "class",
+    "import",
+    "expand",
+    "resolver"
   ],
   "galleryBanner": {
     "color": "#282c34",
