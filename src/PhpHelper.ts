@@ -5,7 +5,7 @@ let vscode = require("vscode");
 let builtInClasses = require("./BuildInClasses");
 let naturalSort = require("node-natural-sort");
 
-class PhpResolver {
+class PhpHelper {
   regexWordWithNamespace = new RegExp(/[a-zA-Z0-9\\]+/);
 
   async importCommand(selected: Selection) {
@@ -711,7 +711,7 @@ class PhpResolver {
   }
 
   config(key: string) {
-    return vscode.workspace.getConfiguration("phpNamespaceResolver").get(key);
+    return vscode.workspace.getConfiguration("phpNamespaceHelper").get(key);
   }
 
   showMessage(message: string, error = false) {
@@ -832,4 +832,4 @@ class PhpResolver {
   }
 }
 
-export default PhpResolver;
+export default PhpHelper;

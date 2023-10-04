@@ -1,6 +1,6 @@
 {
-  "name": "php-namespace-resolver",
-  "displayName": "PHP Namespace Resolver",
+  "name": "php-namespace-helper",
+  "displayName": "PHP Namespace Helper",
   "description": "Import and expand php namespaces",
   "version": "0.0.1",
   "publisher": "vdhoangson",
@@ -10,10 +10,10 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/vdhoangson/vscode-php-namespace-resolver"
+    "url": "https://github.com/vdhoangson/vscode-php-namespace-helper"
   },
   "bugs": {
-    "url": "https://github.com/vdhoangson/vscode-php-namespace-resolver/issues"
+    "url": "https://github.com/vdhoangson/vscode-php-namespace-helper/issues"
   },
   "categories": [
     "Programming Languages"
@@ -32,13 +32,13 @@
   },
   "activationEvents": [
     "onLanguage:php",
-    "onCommand:phpNamespaceResolver.import",
-    "onCommand:phpNamespaceResolver.importAll",
-    "onCommand:phpNamespaceResolver.expand",
-    "onCommand:phpNamespaceResolver.sort",
-    "onCommand:phpNamespaceResolver.highlightNotImported",
-    "onCommand:phpNamespaceResolver.highlightNotUsed",
-    "onCommand:phpNamespaceResolver.generateNamespace"
+    "onCommand:phpNamespaceHelper.import",
+    "onCommand:phpNamespaceHelper.importAll",
+    "onCommand:phpNamespaceHelper.expand",
+    "onCommand:phpNamespaceHelper.sort",
+    "onCommand:phpNamespaceHelper.highlightNotImported",
+    "onCommand:phpNamespaceHelper.highlightNotUsed",
+    "onCommand:phpNamespaceHelper.generateNamespace"
   ],
   "main": "./out/extension.js",
   "icon": "images/icon.png",
@@ -47,44 +47,44 @@
       "editor/context": [
         {
           "when": "resourceLangId == php",
-          "command": "phpNamespaceResolver.import",
-          "alt": "phpNamespaceResolver.import",
+          "command": "phpNamespaceHelper.import",
+          "alt": "phpNamespaceHelper.import",
           "group": "0_namespace_resolver@1"
         },
         {
           "when": "resourceLangId == php",
-          "command": "phpNamespaceResolver.importAll",
-          "alt": "phpNamespaceResolver.importAll",
+          "command": "phpNamespaceHelper.importAll",
+          "alt": "phpNamespaceHelper.importAll",
           "group": "0_namespace_resolver@2"
         },
         {
           "when": "resourceLangId == php",
-          "command": "phpNamespaceResolver.expand",
-          "alt": "phpNamespaceResolver.expand",
+          "command": "phpNamespaceHelper.expand",
+          "alt": "phpNamespaceHelper.expand",
           "group": "0_namespace_resolver@3"
         },
         {
           "when": "resourceLangId == php",
-          "command": "phpNamespaceResolver.sort",
-          "alt": "phpNamespaceResolver.sort",
+          "command": "phpNamespaceHelper.sort",
+          "alt": "phpNamespaceHelper.sort",
           "group": "0_namespace_resolver@4"
         },
         {
           "when": "resourceLangId == php",
-          "command": "phpNamespaceResolver.highlightNotImported",
-          "alt": "phpNamespaceResolver.highlightNotImported",
+          "command": "phpNamespaceHelper.highlightNotImported",
+          "alt": "phpNamespaceHelper.highlightNotImported",
           "group": "0_namespace_resolver@5"
         },
         {
           "when": "resourceLangId == php",
-          "command": "phpNamespaceResolver.highlightNotUsed",
-          "alt": "phpNamespaceResolver.highlightNotUsed",
+          "command": "phpNamespaceHelper.highlightNotUsed",
+          "alt": "phpNamespaceHelper.highlightNotUsed",
           "group": "0_namespace_resolver@6"
         },
         {
           "when": "resourceLangId == php",
-          "command": "phpNamespaceResolver.generateNamespace",
-          "alt": "phpNamespaceResolver.generateNamespace",
+          "command": "phpNamespaceHelper.generateNamespace",
+          "alt": "phpNamespaceHelper.generateNamespace",
           "group": "0_namespace_resolver@7"
         }
       ]
@@ -92,66 +92,66 @@
     "commands": [
       {
         "title": "Import Class",
-        "command": "phpNamespaceResolver.import"
+        "command": "phpNamespaceHelper.import"
       },
       {
         "title": "Import All Classes",
-        "command": "phpNamespaceResolver.importAll"
+        "command": "phpNamespaceHelper.importAll"
       },
       {
         "title": "Expand Class",
-        "command": "phpNamespaceResolver.expand"
+        "command": "phpNamespaceHelper.expand"
       },
       {
         "title": "Sort Imports",
-        "command": "phpNamespaceResolver.sort"
+        "command": "phpNamespaceHelper.sort"
       },
       {
         "title": "Highlight Not Imported Classes",
-        "command": "phpNamespaceResolver.highlightNotImported"
+        "command": "phpNamespaceHelper.highlightNotImported"
       },
       {
         "title": "Highlight Not Used Classes",
-        "command": "phpNamespaceResolver.highlightNotUsed"
+        "command": "phpNamespaceHelper.highlightNotUsed"
       },
       {
         "title": "Generate namespace for this file",
-        "command": "phpNamespaceResolver.generateNamespace"
+        "command": "phpNamespaceHelper.generateNamespace"
       }
     ],
     "keybindings": [
       {
-        "command": "phpNamespaceResolver.import",
+        "command": "phpNamespaceHelper.import",
         "key": "ctrl+alt+i",
         "when": "editorTextFocus"
       },
       {
-        "command": "phpNamespaceResolver.importAll",
+        "command": "phpNamespaceHelper.importAll",
         "key": "ctrl+alt+a",
         "when": "editorTextFocus"
       },
       {
-        "command": "phpNamespaceResolver.expand",
+        "command": "phpNamespaceHelper.expand",
         "key": "ctrl+alt+e",
         "when": "editorTextFocus"
       },
       {
-        "command": "phpNamespaceResolver.sort",
+        "command": "phpNamespaceHelper.sort",
         "key": "ctrl+alt+s",
         "when": "editorTextFocus"
       },
       {
-        "command": "phpNamespaceResolver.highlightNotImported",
+        "command": "phpNamespaceHelper.highlightNotImported",
         "key": "ctrl+alt+n",
         "when": "editorTextFocus"
       },
       {
-        "command": "phpNamespaceResolver.highlightNotUsed",
+        "command": "phpNamespaceHelper.highlightNotUsed",
         "key": "ctrl+alt+u",
         "when": "editorTextFocus"
       },
       {
-        "command": "phpNamespaceResolver.generateNamespace",
+        "command": "phpNamespaceHelper.generateNamespace",
         "key": "ctrl+alt+g",
         "when": "editorTextFocus"
       }
@@ -159,7 +159,7 @@
     "configuration": {
       "title": "Php",
       "properties": {
-        "phpNamespaceResolver.exclude": {
+        "phpNamespaceHelper.exclude": {
           "type": [
             "string",
             "null"
@@ -167,42 +167,42 @@
           "default": "**/node_modules/**",
           "description": "Exclude glob pattern while finding files"
         },
-        "phpNamespaceResolver.showMessageOnStatusBar": {
+        "phpNamespaceHelper.showMessageOnStatusBar": {
           "type": "boolean",
           "default": false,
           "description": "Show message on status bar instead of notification box"
         },
-        "phpNamespaceResolver.autoSort": {
+        "phpNamespaceHelper.autoSort": {
           "type": "boolean",
           "default": true,
           "description": "Auto sort after imports"
         },
-        "phpNamespaceResolver.sortOnSave": {
+        "phpNamespaceHelper.sortOnSave": {
           "type": "boolean",
           "default": false,
           "description": "Auto sort when a file is saved"
         },
-        "phpNamespaceResolver.sortAlphabetically": {
+        "phpNamespaceHelper.sortAlphabetically": {
           "type": "boolean",
           "default": false,
           "description": "Sort imports in alphabetical order instead of line length"
         },
-        "phpNamespaceResolver.sortNatural": {
+        "phpNamespaceHelper.sortNatural": {
           "type": "boolean",
           "default": false,
           "description": "Sort imports using a 'natural order' algorithm"
         },
-        "phpNamespaceResolver.leadingSeparator": {
+        "phpNamespaceHelper.leadingSeparator": {
           "type": "boolean",
           "default": true,
           "description": "Expand class with leading namespace separator"
         },
-        "phpNamespaceResolver.highlightOnSave": {
+        "phpNamespaceHelper.highlightOnSave": {
           "type": "boolean",
           "default": false,
           "description": "Auto highlight not imported and not used when a file is saved"
         },
-        "phpNamespaceResolver.highlightOnOpen": {
+        "phpNamespaceHelper.highlightOnOpen": {
           "type": "boolean",
           "default": false,
           "description": "Auto highlight not imported and not used when a file is opened"

@@ -1,63 +1,62 @@
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from "vscode";
-import PhpResolver from "./PhpResolver";
+import PhpHelper from "./PhpHelper";
 
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
 export function activate(context: vscode.ExtensionContext) {
-  const phpResolver = new PhpResolver();
+  const phpHelper = new PhpHelper();
 
   context.subscriptions.push(
-    vscode.commands.registerCommand("phpNamespaceResolver.import", async () => {
+    vscode.commands.registerCommand("phpNamespaceHelper.import", async () => {
       if (vscode.window.activeTextEditor?.selections !== undefined) {
         for (const element of vscode.window.activeTextEditor.selections) {
-          await phpResolver.importCommand(element);
+          await phpHelper.importCommand(element);
         }
       }
     })
   );
 
   context.subscriptions.push(
-    vscode.commands.registerCommand("phpNamespaceResolver.expand", async () => {
+    vscode.commands.registerCommand("phpNamespaceHelper.expand", async () => {
       if (vscode.window.activeTextEditor?.selections !== undefined) {
         for (const element of vscode.window.activeTextEditor.selections) {
-          await phpResolver.expandCommand(element);
+          await phpHelper.expandCommand(element);
         }
       }
     })
   );
 
   context.subscriptions.push(
-    vscode.commands.registerCommand("phpNamespaceResolver.sort", () =>
-      phpResolver.sortCommand()
+    vscode.commands.registerCommand("phpNamespaceHelper.sort", () =>
+      phpHelper.sortCommand()
     )
   );
 
   context.subscriptions.push(
-    vscode.commands.registerCommand("phpNamespaceResolver.importAll", () =>
-      phpResolver.importAll()
-    )
-  );
-
-  context.subscriptions.push(
-    vscode.commands.registerCommand(
-      "phpNamespaceResolver.highlightNotImported",
-      () => phpResolver.highlightNotImported()
+    vscode.commands.registerCommand("phpNamespaceHelper.importAll", () =>
+      phpHelper.importAll()
     )
   );
 
   context.subscriptions.push(
     vscode.commands.registerCommand(
-      "phpNamespaceResolver.highlightNotUsed",
-      () => phpResolver.highlightNotUsed()
+      "phpNamespaceHelper.highlightNotImported",
+      () => phpHelper.highlightNotImported()
+    )
+  );
+
+  context.subscriptions.push(
+    vscode.commands.registerCommand("phpNamespaceHelper.highlightNotUsed", () =>
+      phpHelper.highlightNotUsed()
     )
   );
 
   context.subscriptions.push(
     vscode.commands.registerCommand(
-      "phpNamespaceResolver.generateNamespace",
-      () => phpResolver.generateNamespace()
+      "phpNamespaceHelper.generateNamespace",
+      () => phpHelper.generateNamespace()
     )
   );
 
@@ -67,21 +66,21 @@ export function activate(context: vscode.ExtensionContext) {
         event &&
         event.document.languageId === "php" &&
         vscode.workspace
-          .getConfiguration("phpNamespaceResolver")
+          .getConfiguration("phpNamespaceHelper")
           .get("sortOnSave")
       ) {
-        phpResolver.sortCommand();
+        phpHelper.sortCommand();
       }
 
       if (
         event &&
         event.document.languageId === "php" &&
         vscode.workspace
-          .getConfiguration("phpNamespaceResolver")
+          .getConfiguration("phpNamespaceHelper")
           .get("highlightOnSave")
       ) {
-        phpResolver.highlightNotImported();
-        phpResolver.highlightNotUsed();
+        phpHelper.highlightNotImported();
+        phpHelper.highlightNotUsed();
       }
     })
   );
@@ -92,11 +91,11 @@ export function activate(context: vscode.ExtensionContext) {
         event &&
         event.document.languageId === "php" &&
         vscode.workspace
-          .getConfiguration("phpNamespaceResolver")
+          .getConfiguration("phpNamespaceHelper")
           .get("highlightOnOpen")
       ) {
-        phpResolver.highlightNotImported();
-        phpResolver.highlightNotUsed();
+        phpHelper.highlightNotImported();
+        phpHelper.highlightNotUsed();
       }
     })
   );
