@@ -1,0 +1,216 @@
+{
+  "name": "php-namespace-resolver",
+  "displayName": "php-namespace-resolver",
+  "description": "",
+  "version": "0.0.1",
+  "license": "MIT",
+  "engines": {
+    "vscode": "^1.82.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "galleryBanner": {
+    "color": "#282c34",
+    "theme": "dark"
+  },
+  "activationEvents": [
+    "onLanguage:php",
+    "onCommand:phpNamespaceResolver.import",
+    "onCommand:phpNamespaceResolver.importAll",
+    "onCommand:phpNamespaceResolver.expand",
+    "onCommand:phpNamespaceResolver.sort",
+    "onCommand:phpNamespaceResolver.highlightNotImported",
+    "onCommand:phpNamespaceResolver.highlightNotUsed",
+    "onCommand:phpNamespaceResolver.generateNamespace"
+  ],
+  "main": "./out/extension.js",
+  "icon": "images/icon.png",
+  "contributes": {
+    "menus": {
+      "editor/context": [
+        {
+          "when": "resourceLangId == php",
+          "command": "phpNamespaceResolver.import",
+          "alt": "phpNamespaceResolver.import",
+          "group": "0_namespace_resolver@1"
+        },
+        {
+          "when": "resourceLangId == php",
+          "command": "phpNamespaceResolver.importAll",
+          "alt": "phpNamespaceResolver.importAll",
+          "group": "0_namespace_resolver@2"
+        },
+        {
+          "when": "resourceLangId == php",
+          "command": "phpNamespaceResolver.expand",
+          "alt": "phpNamespaceResolver.expand",
+          "group": "0_namespace_resolver@3"
+        },
+        {
+          "when": "resourceLangId == php",
+          "command": "phpNamespaceResolver.sort",
+          "alt": "phpNamespaceResolver.sort",
+          "group": "0_namespace_resolver@4"
+        },
+        {
+          "when": "resourceLangId == php",
+          "command": "phpNamespaceResolver.highlightNotImported",
+          "alt": "phpNamespaceResolver.highlightNotImported",
+          "group": "0_namespace_resolver@5"
+        },
+        {
+          "when": "resourceLangId == php",
+          "command": "phpNamespaceResolver.highlightNotUsed",
+          "alt": "phpNamespaceResolver.highlightNotUsed",
+          "group": "0_namespace_resolver@6"
+        },
+        {
+          "when": "resourceLangId == php",
+          "command": "phpNamespaceResolver.generateNamespace",
+          "alt": "phpNamespaceResolver.generateNamespace",
+          "group": "0_namespace_resolver@7"
+        }
+      ]
+    },
+    "commands": [
+      {
+        "title": "Import Class",
+        "command": "phpNamespaceResolver.import"
+      },
+      {
+        "title": "Import All Classes",
+        "command": "phpNamespaceResolver.importAll"
+      },
+      {
+        "title": "Expand Class",
+        "command": "phpNamespaceResolver.expand"
+      },
+      {
+        "title": "Sort Imports",
+        "command": "phpNamespaceResolver.sort"
+      },
+      {
+        "title": "Highlight Not Imported Classes",
+        "command": "phpNamespaceResolver.highlightNotImported"
+      },
+      {
+        "title": "Highlight Not Used Classes",
+        "command": "phpNamespaceResolver.highlightNotUsed"
+      },
+      {
+        "title": "Generate namespace for this file",
+        "command": "phpNamespaceResolver.generateNamespace"
+      }
+    ],
+    "keybindings": [
+      {
+        "command": "phpNamespaceResolver.import",
+        "key": "ctrl+alt+i",
+        "when": "editorTextFocus"
+      },
+      {
+        "command": "phpNamespaceResolver.importAll",
+        "key": "ctrl+alt+a",
+        "when": "editorTextFocus"
+      },
+      {
+        "command": "phpNamespaceResolver.expand",
+        "key": "ctrl+alt+e",
+        "when": "editorTextFocus"
+      },
+      {
+        "command": "phpNamespaceResolver.sort",
+        "key": "ctrl+alt+s",
+        "when": "editorTextFocus"
+      },
+      {
+        "command": "phpNamespaceResolver.highlightNotImported",
+        "key": "ctrl+alt+n",
+        "when": "editorTextFocus"
+      },
+      {
+        "command": "phpNamespaceResolver.highlightNotUsed",
+        "key": "ctrl+alt+u",
+        "when": "editorTextFocus"
+      },
+      {
+        "command": "phpNamespaceResolver.generateNamespace",
+        "key": "ctrl+alt+g",
+        "when": "editorTextFocus"
+      }
+    ],
+    "configuration": {
+      "title": "Php",
+      "properties": {
+        "phpNamespaceResolver.exclude": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "default": "**/node_modules/**",
+          "description": "Exclude glob pattern while finding files"
+        },
+        "phpNamespaceResolver.showMessageOnStatusBar": {
+          "type": "boolean",
+          "default": false,
+          "description": "Show message on status bar instead of notification box"
+        },
+        "phpNamespaceResolver.autoSort": {
+          "type": "boolean",
+          "default": true,
+          "description": "Auto sort after imports"
+        },
+        "phpNamespaceResolver.sortOnSave": {
+          "type": "boolean",
+          "default": false,
+          "description": "Auto sort when a file is saved"
+        },
+        "phpNamespaceResolver.sortAlphabetically": {
+          "type": "boolean",
+          "default": false,
+          "description": "Sort imports in alphabetical order instead of line length"
+        },
+        "phpNamespaceResolver.sortNatural": {
+          "type": "boolean",
+          "default": false,
+          "description": "Sort imports using a 'natural order' algorithm"
+        },
+        "phpNamespaceResolver.leadingSeparator": {
+          "type": "boolean",
+          "default": true,
+          "description": "Expand class with leading namespace separator"
+        },
+        "phpNamespaceResolver.highlightOnSave": {
+          "type": "boolean",
+          "default": false,
+          "description": "Auto highlight not imported and not used when a file is saved"
+        },
+        "phpNamespaceResolver.highlightOnOpen": {
+          "type": "boolean",
+          "default": false,
+          "description": "Auto highlight not imported and not used when a file is opened"
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "yarn run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "lint": "eslint src --ext ts"
+  },
+  "devDependencies": {
+    "@types/node": "16.x",
+    "@types/vscode": "^1.82.0",
+    "@typescript-eslint/eslint-plugin": "^6.4.1",
+    "@typescript-eslint/parser": "^6.4.1",
+    "@vscode/test-electron": "^2.3.4",
+    "eslint": "^8.47.0",
+    "glob": "^10.3.3",
+    "typescript": "^5.1.6"
+  },
+  "dependencies": {
+    "node-natural-sort": "^0.8.7"
+  }
+}
