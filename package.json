@@ -1,8 +1,9 @@
 {
   "name": "php-namespace-resolver",
-  "displayName": "php-namespace-resolver",
-  "description": "",
+  "displayName": "PHP Namespace Resolver",
+  "description": "Import and expand php namespaces",
   "version": "0.0.1",
+  "publisher": "vdhoangson",
   "license": "MIT",
   "engines": {
     "vscode": "^1.82.0"
