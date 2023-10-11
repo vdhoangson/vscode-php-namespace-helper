@@ -16,50 +16,52 @@ Search these commands by the title on command palette.
 [
   {
     title: "Import Class",
-    command: "namespaceResolver.import",
+    command: "phpNamespaceHelper.import",
   },
   {
     title: "Import All Classes",
-    command: "namespaceResolver.importAll",
+    command: "phpNamespaceHelper.importAll",
   },
   {
     title: "Expand Class",
-    command: "namespaceResolver.expand",
+    command: "phpNamespaceHelper.expand",
   },
   {
     title: "Sort Imports",
-    command: "namespaceResolver.sort",
+    command: "phpNamespaceHelper.sort",
   },
   {
     title: "Highlight Not Imported Classes",
-    command: "namespaceResolver.highlightNotImported",
+    command: "phpNamespaceHelper.highlightNotImported",
   },
   {
     title: "Highlight Not Used Classes",
-    command: "namespaceResolver.highlightNotUsed",
+    command: "phpNamespaceHelper.highlightNotUsed",
   },
   {
     title: "Generate namespace for this file",
-    command: "namespaceResolver.generateNamespace",
+    command: "phpNamespaceHelper.generateNamespace",
   },
 ];
 ```
 
 ## Settings
 
+![](./screenshots/setting.png)
+
 You can override these default settings according to your needs.
 
 ```javascript
 {
-    "namespaceResolver.exclude": "**/node_modules/**",  // Exclude glob pattern while finding files
-    "namespaceResolver.showMessageOnStatusBar": false,  // Show message on status bar instead of notification box
-    "namespaceResolver.autoSort": true,                 // Auto sort after imports
-    "namespaceResolver.sortOnSave": false,              // Auto sort when a file is saved
-    "namespaceResolver.sortAlphabetically": false,      // Sort imports in alphabetical order instead of line length
-    "namespaceResolver.sortNatural": false,             // Sort imports using a 'natural order' algorithm
-    "namespaceResolver.leadingSeparator": true,         // Expand class with leading namespace separator
-    "namespaceResolver.highlightOnSave": false,         // Auto highlight not imported and not used when a file is saved
-    "namespaceResolver.highlightOnOpen": false          // Auto highlight not imported and not used when a file is opened
+    "phpNamespaceHelper.exclude": "**/node_modules/**",  // Exclude glob pattern while finding files
+    "phpNamespaceHelper.showMessageOnStatusBar": false,  // Show message on status bar instead of notification box
+    "phpNamespaceHelper.autoSort": true,                 // Auto sort after imports
+    "phpNamespaceHelper.sortOnSave": false,              // Auto sort when a file is saved
+    "phpNamespaceHelper.sortAlphabetically": false,      // Sort imports in alphabetical order instead of line length
+    "phpNamespaceHelper.sortNatural": false,             // Sort imports using a 'natural order' algorithm
+    "phpNamespaceHelper.leadingSeparator": true,         // Expand class with leading namespace separator
+    "phpNamespaceHelper.highlightOnSave": false,         // Auto highlight not imported and not used when a file is saved
+    "phpNamespaceHelper.highlightOnOpen": false          // Auto highlight not imported and not used when a file is opened
 }
 ```
 
@@ -70,37 +72,37 @@ You can override these default keybindings on your `keybindings.json`.
 ```javascript
 [
   {
-    command: "namespaceResolver.import",
+    command: "phpNamespaceHelper.import",
     key: "ctrl+alt+i",
     when: "editorTextFocus",
   },
   {
-    command: "namespaceResolver.importAll",
+    command: "phpNamespaceHelper.importAll",
     key: "ctrl+alt+a",
     when: "editorTextFocus",
   },
   {
-    command: "namespaceResolver.expand",
+    command: "phpNamespaceHelper.expand",
     key: "ctrl+alt+e",
     when: "editorTextFocus",
   },
   {
-    command: "namespaceResolver.sort",
+    command: "phpNamespaceHelper.sort",
     key: "ctrl+alt+s",
     when: "editorTextFocus",
   },
   {
-    command: "namespaceResolver.highlightNotImported",
+    command: "phpNamespaceHelper.highlightNotImported",
     key: "ctrl+alt+n",
     when: "editorTextFocus",
   },
   {
-    command: "namespaceResolver.highlightNotUsed",
+    command: "phpNamespaceHelper.highlightNotUsed",
     key: "ctrl+alt+u",
     when: "editorTextFocus",
   },
   {
-    command: "namespaceResolver.generateNamespace",
+    command: "phpNamespaceHelper.generateNamespace",
     key: "ctrl+alt+g",
     when: "editorTextFocus",
   },
