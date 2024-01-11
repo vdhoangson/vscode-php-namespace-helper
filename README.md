@@ -1,8 +1,6 @@
-# PHP Namespace Resolver
+# PHP Namespace Helper
 
-Base on Extension https://github.com/MehediDracula/PHP-Namespace-Resolver
-
-PHP Namespace Resolver can import and expand your class. You can also sort your imported classes by line length or in alphabetical order.
+PHP Namespace Helper can import and expand your class. You can also sort your imported classes by line length or in alphabetical order.
 
 ## Demo
 

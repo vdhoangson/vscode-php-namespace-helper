@@ -2,7 +2,7 @@
   "name": "php-namespace-helper",
   "displayName": "PHP Namespace Helper",
   "description": "Import and expand php namespaces",
-  "version": "0.0.1",
+  "version": "1.0.2",
   "publisher": "vdhoangson",
   "license": "MIT",
   "engines": {
@@ -24,7 +24,8 @@
     "class",
     "import",
     "expand",
-    "resolver"
+    "resolver",
+    "helper"
   ],
   "galleryBanner": {
     "color": "#282c34",
@@ -49,43 +50,43 @@
           "when": "resourceLangId == php",
           "command": "phpNamespaceHelper.import",
           "alt": "phpNamespaceHelper.import",
-          "group": "0_namespace_resolver@1"
+          "group": "vscode_php_namespace_helper@1"
         },
         {
           "when": "resourceLangId == php",
           "command": "phpNamespaceHelper.importAll",
           "alt": "phpNamespaceHelper.importAll",
-          "group": "0_namespace_resolver@2"
+          "group": "vscode_php_namespace_helper@2"
         },
         {
           "when": "resourceLangId == php",
           "command": "phpNamespaceHelper.expand",
           "alt": "phpNamespaceHelper.expand",
-          "group": "0_namespace_resolver@3"
+          "group": "vscode_php_namespace_helper@3"
         },
         {
           "when": "resourceLangId == php",
           "command": "phpNamespaceHelper.sort",
           "alt": "phpNamespaceHelper.sort",
-          "group": "0_namespace_resolver@4"
+          "group": "vscode_php_namespace_helper@4"
         },
         {
           "when": "resourceLangId == php",
           "command": "phpNamespaceHelper.highlightNotImported",
           "alt": "phpNamespaceHelper.highlightNotImported",
-          "group": "0_namespace_resolver@5"
+          "group": "vscode_php_namespace_helper@5"
         },
         {
           "when": "resourceLangId == php",
           "command": "phpNamespaceHelper.highlightNotUsed",
           "alt": "phpNamespaceHelper.highlightNotUsed",
-          "group": "0_namespace_resolver@6"
+          "group": "vscode_php_namespace_helper@6"
         },
         {
           "when": "resourceLangId == php",
           "command": "phpNamespaceHelper.generateNamespace",
           "alt": "phpNamespaceHelper.generateNamespace",
-          "group": "0_namespace_resolver@7"
+          "group": "vscode_php_namespace_helper@7"
         }
       ]
     },

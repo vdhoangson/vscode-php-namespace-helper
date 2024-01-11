@@ -435,7 +435,9 @@ class PhpHelper {
       return this.showErrorMessage(error.message);
     }
 
-    this.showMessage("$(check)  Imports are sorted.");
+    if (!this.config("autoSort")) {
+      this.showMessage("$(check)  Imports are sorted.");
+    }
   }
 
   findFiles(resolving: string | undefined): any {
@@ -564,13 +566,13 @@ class PhpHelper {
     };
 
     if (this.config("sortNatural")) {
-      let natsort = naturalSort({
+      let naturalSortFunc = naturalSort({
         caseSensitive: true,
         order: this.config("sortAlphabetically") ? "ASC" : "DESC",
       });
 
       sortFunction = (a, b) => {
-        return natsort(a.text, b.text);
+        return naturalSortFunc(a.text, b.text);
       };
     }
 
