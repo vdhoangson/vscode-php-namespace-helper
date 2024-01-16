@@ -2,7 +2,7 @@
   "name": "php-namespace-helper",
   "displayName": "PHP Namespace Helper",
   "description": "Import and expand php namespaces",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "publisher": "vdhoangson",
   "license": "MIT",
   "engines": {
@@ -123,37 +123,37 @@
     "keybindings": [
       {
         "command": "phpNamespaceHelper.import",
-        "key": "ctrl+alt+i",
+        "key": "ctrl+shift+i",
         "when": "editorTextFocus"
       },
       {
         "command": "phpNamespaceHelper.importAll",
-        "key": "ctrl+alt+a",
+        "key": "ctrl+shift+a",
         "when": "editorTextFocus"
       },
       {
         "command": "phpNamespaceHelper.expand",
-        "key": "ctrl+alt+e",
+        "key": "ctrl+shift+e",
         "when": "editorTextFocus"
       },
       {
         "command": "phpNamespaceHelper.sort",
-        "key": "ctrl+alt+s",
+        "key": "ctrl+shift+s",
         "when": "editorTextFocus"
       },
       {
         "command": "phpNamespaceHelper.highlightNotImported",
-        "key": "ctrl+alt+n",
+        "key": "ctrl+shift+n",
         "when": "editorTextFocus"
       },
       {
         "command": "phpNamespaceHelper.highlightNotUsed",
-        "key": "ctrl+alt+u",
+        "key": "ctrl+shift+u",
         "when": "editorTextFocus"
       },
       {
         "command": "phpNamespaceHelper.generateNamespace",
-        "key": "ctrl+alt+g",
+        "key": "ctrl+shift+g",
         "when": "editorTextFocus"
       }
     ],
