@@ -2,11 +2,12 @@
   "name": "php-namespace-helper",
   "displayName": "PHP Namespace Helper",
   "description": "Import and expand php namespaces",
-  "version": "1.0.4",
+  "version": "1.1.0",
   "publisher": "vdhoangson",
+  "author": "vdhoangson",
   "license": "MIT",
   "engines": {
-    "vscode": "^1.82.0"
+    "vscode": "^1.87.0"
   },
   "repository": {
     "type": "git",
@@ -16,7 +17,8 @@
     "url": "https://github.com/vdhoangson/vscode-php-namespace-helper/issues"
   },
   "categories": [
-    "Programming Languages"
+    "Programming Languages",
+    "Other"
   ],
   "keywords": [
     "php",
@@ -33,13 +35,7 @@
   },
   "activationEvents": [
     "onLanguage:php",
-    "onCommand:phpNamespaceHelper.import",
-    "onCommand:phpNamespaceHelper.importAll",
-    "onCommand:phpNamespaceHelper.expand",
-    "onCommand:phpNamespaceHelper.sort",
-    "onCommand:phpNamespaceHelper.highlightNotImported",
-    "onCommand:phpNamespaceHelper.highlightNotUsed",
-    "onCommand:phpNamespaceHelper.generateNamespace"
+    "onStartupFinished"
   ],
   "main": "./out/extension.js",
   "icon": "images/icon.png",
@@ -72,18 +68,6 @@
         },
         {
           "when": "resourceLangId == php",
-          "command": "phpNamespaceHelper.highlightNotImported",
-          "alt": "phpNamespaceHelper.highlightNotImported",
-          "group": "vscode_php_namespace_helper@5"
-        },
-        {
-          "when": "resourceLangId == php",
-          "command": "phpNamespaceHelper.highlightNotUsed",
-          "alt": "phpNamespaceHelper.highlightNotUsed",
-          "group": "vscode_php_namespace_helper@6"
-        },
-        {
-          "when": "resourceLangId == php",
           "command": "phpNamespaceHelper.generateNamespace",
           "alt": "phpNamespaceHelper.generateNamespace",
           "group": "vscode_php_namespace_helper@7"
@@ -106,14 +90,6 @@
       {
         "title": "Sort Imports",
         "command": "phpNamespaceHelper.sort"
-      },
-      {
-        "title": "Highlight Not Imported Classes",
-        "command": "phpNamespaceHelper.highlightNotImported"
-      },
-      {
-        "title": "Highlight Not Used Classes",
-        "command": "phpNamespaceHelper.highlightNotUsed"
       },
       {
         "title": "Generate namespace for this file",
@@ -142,23 +118,13 @@
         "when": "editorTextFocus"
       },
       {
-        "command": "phpNamespaceHelper.highlightNotImported",
-        "key": "ctrl+alt+n",
-        "when": "editorTextFocus"
-      },
-      {
-        "command": "phpNamespaceHelper.highlightNotUsed",
-        "key": "ctrl+alt+u",
-        "when": "editorTextFocus"
-      },
-      {
         "command": "phpNamespaceHelper.generateNamespace",
         "key": "ctrl+alt+g",
         "when": "editorTextFocus"
       }
     ],
     "configuration": {
-      "title": "Php",
+      "title": "PHP Namespace Helper",
       "properties": {
         "phpNamespaceHelper.exclude": {
           "type": [
@@ -173,6 +139,25 @@
           "default": false,
           "description": "Show message on status bar instead of notification box"
         },
+        "phpNamespaceHelper.sort": {
+          "type": "string",
+          "enum": [
+            "length",
+            "natural",
+            "alphabet"
+          ],
+          "default": "length",
+          "description": "Sort method"
+        },
+        "phpNamespaceHelper.sortOrder": {
+          "type": "string",
+          "enum": [
+            "ASC",
+            "DESC"
+          ],
+          "default": "ASC",
+          "description": "Sort order for natural method"
+        },
         "phpNamespaceHelper.autoSort": {
           "type": "boolean",
           "default": true,
@@ -180,33 +165,48 @@
         },
         "phpNamespaceHelper.sortOnSave": {
           "type": "boolean",
-          "default": false,
+          "default": true,
           "description": "Auto sort when a file is saved"
         },
-        "phpNamespaceHelper.sortAlphabetically": {
-          "type": "boolean",
-          "default": false,
-          "description": "Sort imports in alphabetical order instead of line length"
-        },
-        "phpNamespaceHelper.sortNatural": {
-          "type": "boolean",
-          "default": false,
-          "description": "Sort imports using a 'natural order' algorithm"
+        "phpNamespaceHelper.command": {
+          "type": "string",
+          "default": "php",
+          "description": "php command path"
         },
         "phpNamespaceHelper.leadingSeparator": {
           "type": "boolean",
           "default": true,
           "description": "Expand class with leading namespace separator"
         },
-        "phpNamespaceHelper.highlightOnSave": {
-          "type": "boolean",
-          "default": false,
-          "description": "Auto highlight not imported and not used when a file is saved"
+        "phpNamespaceHelper.builtIns": {
+          "type": "array",
+          "default": [
+            "get_declared_classes()",
+            "get_declared_interfaces()"
+          ],
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "uniqueItems": true,
+          "description": "php methods to get builtin/extension classes & interfaces"
         },
-        "phpNamespaceHelper.highlightOnOpen": {
-          "type": "boolean",
-          "default": false,
-          "description": "Auto highlight not imported and not used when a file is opened"
+        "phpNamespaceHelper.namespacePrefix": {
+          "type": [
+            "string"
+          ],
+          "default": "",
+          "markdownDescription": "add a prefix for all generated namespaces\n\nex.`My\\Project\\`"
+        },
+        "phpNamespaceHelper.removePath": {
+          "type": "array",
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "minItems": 0,
+          "uniqueItems": true,
+          "markdownDescription": "remove parts from the namespace by regex\n\nex.`remove 'V[0-9]+(\\\\)?' from My\\Project\\V100400\\Folder`"
         }
       }
     }
@@ -218,16 +218,22 @@
     "lint": "eslint src --ext ts"
   },
   "devDependencies": {
-    "@types/node": "16.x",
-    "@types/vscode": "^1.82.0",
-    "@typescript-eslint/eslint-plugin": "^6.4.1",
-    "@typescript-eslint/parser": "^6.4.1",
+    "@types/fs-extra": "^11.0.4",
+    "@types/node": "^20.11.24",
+    "@types/vscode": "^1.87.0",
+    "@typescript-eslint/eslint-plugin": "^7.1",
+    "@typescript-eslint/parser": "^7.1",
     "@vscode/test-electron": "^2.3.4",
     "eslint": "^8.47.0",
+    "fs-extra": "^11.2.0",
     "glob": "^10.3.3",
     "typescript": "^5.1.6"
   },
   "dependencies": {
-    "node-natural-sort": "^0.8.7"
+    "execa": "^8.0.1",
+    "find-up": "^7.0.0",
+    "natural-orderby": "^3.0.2",
+    "php-parser": "^3.1.5",
+    "typescript": "^5.1.6"
   }
 }
