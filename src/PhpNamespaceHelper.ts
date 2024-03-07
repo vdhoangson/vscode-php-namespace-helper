@@ -170,7 +170,7 @@ class PhpNamespaceHelper {
       phpClasses = [...new Set(phpClasses)];
 
       for (let phpClass of phpClasses) {
-        if (phpClass === phpClasses[phpClasses.length - 1]) {
+        if (phpClass === phpClasses[phpClasses?.length - 1]) {
           this.multiImporting = false;
         }
         try {
@@ -412,7 +412,7 @@ class PhpNamespaceHelper {
 
       await this.EDITOR.edit((textEdit: any) => {
         textEdit.replace(
-          new vscode.Range(realLine, 0, realLine, text.length),
+          new vscode.Range(realLine, 0, realLine, text?.length),
           newNs.trim()
         );
       });
@@ -510,7 +510,7 @@ class PhpNamespaceHelper {
       className
     );
 
-    if (parsedNamespaces.length === 0) {
+    if (parsedNamespaces?.length === 0) {
       return this.showMessage(
         `The namspace of the class ${className} is not found.`,
         true
@@ -582,7 +582,7 @@ class PhpNamespaceHelper {
     // If namespace can't be parsed but there is a file with the same
     // name of selected text then assuming it's a global class and
     // add that in the parsedNamespaces array as a global class.
-    if (parsedNamespaces.length === 0 && docs.length > 0) {
+    if (parsedNamespaces?.length === 0 && docs.length > 0) {
       parsedNamespaces.push(className);
     }
 
@@ -596,7 +596,7 @@ class PhpNamespaceHelper {
 
     const { useStatements } = this.getDeclarations();
 
-    if (useStatements.length <= 1) {
+    if (useStatements?.length <= 1) {
       throw new Error("Nothing to sort.");
     }
     const sortAlphabetically = this.config("sort") === "alphabet";
@@ -618,7 +618,7 @@ class PhpNamespaceHelper {
 
         return 0;
       } else {
-        if (aText.length + aAlias.length === bText.length + bAlias.length) {
+        if (aText?.length + aAlias?.length === bText?.length + bAlias?.length) {
           if (aText.toLowerCase() < bText.toLowerCase()) {
             return -1;
           }
@@ -628,7 +628,9 @@ class PhpNamespaceHelper {
           }
         }
 
-        return aText.length + aAlias.length - (bText.length + bAlias.length);
+        return (
+          aText?.length + aAlias?.length - (bText?.length + bAlias?.length)
+        );
       }
     };
 
@@ -647,15 +649,15 @@ class PhpNamespaceHelper {
 
     this.EDITOR?.edit(
       (textEdit) => {
-        for (let i = 0; i < sorted.length; i++) {
+        for (let i = 0; i < sorted?.length; i++) {
           try {
             const sortItem = sorted[i];
             const item = useStatements[i];
 
-            let itemLength = item.text.length + 4; // 'use '
+            let itemLength = item.text?.length + 4; // 'use '
 
             if (item.alias) {
-              itemLength += item.alias.length + 4; // ' as '
+              itemLength += item.alias?.length + 4; // ' as '
             }
 
             let sortText = `use ${sortItem.text}`;
@@ -753,7 +755,7 @@ class PhpNamespaceHelper {
   getInsertLine(declarationLines: DeclarationLines) {
     const _use = declarationLines.useStatement;
 
-    if (_use.length) {
+    if (_use?.length) {
       return _use[0].loc.start.line - 1;
     }
 
