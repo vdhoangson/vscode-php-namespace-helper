@@ -29,14 +29,6 @@ Search these commands by the title on command palette.
     command: "phpNamespaceHelper.sort",
   },
   {
-    title: "Highlight Not Imported Classes",
-    command: "phpNamespaceHelper.highlightNotImported",
-  },
-  {
-    title: "Highlight Not Used Classes",
-    command: "phpNamespaceHelper.highlightNotUsed",
-  },
-  {
     title: "Generate namespace for this file",
     command: "phpNamespaceHelper.generateNamespace",
   },
@@ -58,8 +50,6 @@ You can override these default settings according to your needs.
     "phpNamespaceHelper.sortAlphabetically": false,      // Sort imports in alphabetical order instead of line length
     "phpNamespaceHelper.sortNatural": false,             // Sort imports using a 'natural order' algorithm
     "phpNamespaceHelper.leadingSeparator": true,         // Expand class with leading namespace separator
-    "phpNamespaceHelper.highlightOnSave": false,         // Auto highlight not imported and not used when a file is saved
-    "phpNamespaceHelper.highlightOnOpen": false          // Auto highlight not imported and not used when a file is opened
 }
 ```
 
@@ -87,16 +77,6 @@ You can override these default keybindings on your `keybindings.json`.
   {
     command: "phpNamespaceHelper.sort",
     key: "ctrl+alt+s",
-    when: "editorTextFocus",
-  },
-  {
-    command: "phpNamespaceHelper.highlightNotImported",
-    key: "ctrl+alt+n",
-    when: "editorTextFocus",
-  },
-  {
-    command: "phpNamespaceHelper.highlightNotUsed",
-    key: "ctrl+alt+u",
     when: "editorTextFocus",
   },
   {
