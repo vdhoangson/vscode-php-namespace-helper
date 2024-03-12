@@ -3,9 +3,21 @@
 import * as vscode from "vscode";
 import PhpNamespaceHelper from "./PhpNamespaceHelper";
 
+const outputChannel = vscode.window.createOutputChannel(
+  "PHP Namespace Helper",
+  "log"
+);
+
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
-export function activate(context: vscode.ExtensionContext) {
+export async function activate(context: vscode.ExtensionContext) {
+  outputChannel.appendLine("Init extension PhpNamespaceHelper");
+
+  const createDiagnosticCollection =
+    vscode.languages.createDiagnosticCollection("PhpNamespaceHelper");
+
+  context.subscriptions.push(createDiagnosticCollection);
+
   const phpNamespaceHelper = new PhpNamespaceHelper();
 
   context.subscriptions.push(
@@ -29,26 +41,28 @@ export function activate(context: vscode.ExtensionContext) {
   );
 
   context.subscriptions.push(
-    vscode.commands.registerCommand("phpNamespaceHelper.sort", () =>
-      phpNamespaceHelper.sortCommand()
+    vscode.commands.registerCommand(
+      "phpNamespaceHelper.sort",
+      async () => await phpNamespaceHelper.sortCommand()
     )
   );
 
   context.subscriptions.push(
-    vscode.commands.registerCommand("phpNamespaceHelper.importAll", () =>
-      phpNamespaceHelper.importAllCommand()
+    vscode.commands.registerCommand(
+      "phpNamespaceHelper.importAll",
+      async () => await phpNamespaceHelper.importAllCommand()
     )
   );
 
   context.subscriptions.push(
     vscode.commands.registerCommand(
       "phpNamespaceHelper.generateNamespace",
-      () => phpNamespaceHelper.generateNamespaceCommand()
+      async () => await phpNamespaceHelper.generateNamespaceCommand()
     )
   );
 
   context.subscriptions.push(
-    vscode.workspace.onWillSaveTextDocument((event) => {
+    vscode.workspace.onWillSaveTextDocument(async (event) => {
       if (
         event &&
         event.document.languageId === "php" &&
@@ -56,7 +70,7 @@ export function activate(context: vscode.ExtensionContext) {
           .getConfiguration("phpNamespaceHelper")
           .get("sortOnSave")
       ) {
-        phpNamespaceHelper.sortCommand();
+        await phpNamespaceHelper.sortCommand();
       }
     })
   );

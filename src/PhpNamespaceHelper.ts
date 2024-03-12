@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/naming-convention */
-import { Selection } from "vscode";
 import { DeclarationLines } from "./interfaces";
 import {
   getFromFunctionParameters,
@@ -13,22 +11,22 @@ import { findComposerFileByUri, getComposerFileData } from "./helpers/composer";
 import * as vscode from "vscode";
 import * as Parser from "./Parser";
 import { compare } from "natural-orderby";
-import * as path from "node:path";
+import path from 'node:path';
 import builtInClasses from "./BuildInClasses";
-import * as fs from "fs-extra";
+import fs from "fs-extra";
 
 const regexWordWithNamespace = new RegExp(/[a-zA-Z0-9\\]+/);
 const outputChannel = vscode.window.createOutputChannel(
-  "phpNamespaceHelper",
+  "PHP Namespace Helper",
   "log"
 );
 
-class PhpNamespaceHelper {
+export class PhpNamespaceHelper {
   BUILT_IN_CLASSES: any = builtInClasses;
   EDITOR!: vscode.TextEditor;
   CLASS_AST: any;
   multiImporting: boolean = false;
-  CWD: string;
+  CWD!: string;
 
   constructor() {
     this.setEditor();
@@ -55,7 +53,7 @@ class PhpNamespaceHelper {
       );
     } catch (error: any) {
       this.showMessage(error.message, true);
-
+      outputChannel.appendLine(error.message);
       throw new Error();
     }
   }
@@ -70,6 +68,7 @@ class PhpNamespaceHelper {
       .then((_data) => (this.BUILT_IN_CLASSES = _data.flat()))
       .catch((error: any) => {
         console.error(error);
+        outputChannel.appendLine(error.message);
       });
   }
 
@@ -83,7 +82,7 @@ class PhpNamespaceHelper {
     try {
       const { execaCommand } = await import("execa");
       const { stdout } = await execaCommand(
-        `${phpCommand} -r 'echo json_encode(${method});'`,
+        `${phpCommand} -r "echo json_encode(${method});"`,
         {
           cwd: this.CWD,
           shell: vscode.env.shell,
@@ -98,7 +97,10 @@ class PhpNamespaceHelper {
     }
   }
 
-  async expandCommand(selection: Selection) {
+  async expandCommand(selection: vscode.Selection) {
+    this.setEditor();
+    this.setAST();
+
     const resolving = this.resolving(selection);
 
     if (resolving === undefined) {
@@ -119,7 +121,10 @@ class PhpNamespaceHelper {
 
     await this.changeSelectedClass(selection, fileNameSpace, true);
   }
-  async importCommand(selected: Selection) {
+
+  async importCommand(selected: vscode.Selection) {
+    this.setEditor();
+    this.setAST();
     let resolving = this.resolving(selected);
 
     if (resolving === undefined) {
@@ -127,7 +132,7 @@ class PhpNamespaceHelper {
     }
 
     let fileNameSpace;
-    let replaceClassAfterImport = false;
+    let replaceClassAfterImport: boolean = false;
 
     if (/^\\/.test(resolving)) {
       fileNameSpace = resolving.replace(/^\\/, "");
@@ -147,6 +152,7 @@ class PhpNamespaceHelper {
       fileNameSpace = await this.pickClass(namespaces);
     }
 
+    outputChannel.replace("Import class");
     return this.importClass(selected, fileNameSpace, replaceClassAfterImport);
   }
 
@@ -226,7 +232,7 @@ class PhpNamespaceHelper {
   }
 
   importClass(
-    selected: Selection,
+    selected: vscode.Selection,
     fileNameSpace: any,
     replaceClassAfterImport = false
   ) {
@@ -322,7 +328,7 @@ class PhpNamespaceHelper {
   }
 
   async insertAsAlias(
-    selection: Selection,
+    selection: vscode.Selection,
     fileNameSpace: any,
     useStatements: any,
     declarationLines: DeclarationLines
@@ -357,7 +363,7 @@ class PhpNamespaceHelper {
     );
   }
   async insertNewUseStatement(
-    selection: Selection,
+    selection: vscode.Selection,
     fileNameSpace: any,
     useStatements: Array<any>,
     declarationLines: DeclarationLines
@@ -428,7 +434,7 @@ class PhpNamespaceHelper {
    * @param alias
    */
   async importAndReplaceSelectedClass(
-    selection: Selection,
+    selection: vscode.Selection,
     replacingClassName: any,
     fileNameSpace: any,
     declarationLines: DeclarationLines,
@@ -443,7 +449,7 @@ class PhpNamespaceHelper {
   }
 
   async changeSelectedClass(
-    selection: Selection,
+    selection: vscode.Selection,
     replacingClassName: any,
     prependBackslash = false
   ) {
@@ -481,11 +487,11 @@ class PhpNamespaceHelper {
     this.EDITOR.selection = new vscode.Selection(newPosition, newPosition);
   }
 
-  sortCommand() {
+  async sortCommand() {
     try {
       this.setEditor();
       this.setAST();
-      this.sortImports();
+      await this.sortImports();
     } catch (error: any) {
       console.log(error);
       return this.showErrorMessage(error.message);
@@ -553,6 +559,7 @@ class PhpNamespaceHelper {
         continue;
       }
 
+      //@ts-ignore
       textDocuments.push(await fs.readFile(file.path));
     }
 
@@ -714,8 +721,9 @@ class PhpNamespaceHelper {
       let text = document?.lineAt(line).text;
 
       if (text?.startsWith("use ")) {
-        let textMatch = text.match(/(\w+?);/);
+        let textMatch: any = text.match(/(\w+?);/);
         if (textMatch) {
+          //@ts-ignore
           useStatements.push(textMatch[1]);
         }
         //@ts-ignore
@@ -773,7 +781,7 @@ class PhpNamespaceHelper {
     }
   }
 
-  resolving(selection: Selection): string | undefined {
+  resolving(selection: vscode.Selection): string | undefined {
     if (typeof selection === "string") {
       return selection;
     }
