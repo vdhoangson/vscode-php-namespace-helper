@@ -2,12 +2,12 @@
   "name": "php-namespace-helper",
   "displayName": "PHP Namespace Helper",
   "description": "Import and expand php namespaces",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "publisher": "vdhoangson",
   "author": "vdhoangson",
   "license": "MIT",
   "engines": {
-    "vscode": "^1.87.0"
+    "vscode": "^1.68.0"
   },
   "repository": {
     "type": "git",
@@ -37,7 +37,7 @@
     "onLanguage:php",
     "onStartupFinished"
   ],
-  "main": "./out/extension.js",
+  "main": "./out/extension",
   "icon": "images/icon.png",
   "contributes": {
     "menus": {
@@ -45,31 +45,26 @@
         {
           "when": "resourceLangId == php",
           "command": "phpNamespaceHelper.import",
-          "alt": "phpNamespaceHelper.import",
           "group": "vscode_php_namespace_helper@1"
         },
         {
           "when": "resourceLangId == php",
           "command": "phpNamespaceHelper.importAll",
-          "alt": "phpNamespaceHelper.importAll",
           "group": "vscode_php_namespace_helper@2"
         },
         {
           "when": "resourceLangId == php",
           "command": "phpNamespaceHelper.expand",
-          "alt": "phpNamespaceHelper.expand",
           "group": "vscode_php_namespace_helper@3"
         },
         {
           "when": "resourceLangId == php",
           "command": "phpNamespaceHelper.sort",
-          "alt": "phpNamespaceHelper.sort",
           "group": "vscode_php_namespace_helper@4"
         },
         {
           "when": "resourceLangId == php",
           "command": "phpNamespaceHelper.generateNamespace",
-          "alt": "phpNamespaceHelper.generateNamespace",
           "group": "vscode_php_namespace_helper@7"
         }
       ]
@@ -94,33 +89,6 @@
       {
         "title": "Generate namespace for this file",
         "command": "phpNamespaceHelper.generateNamespace"
-      }
-    ],
-    "keybindings": [
-      {
-        "command": "phpNamespaceHelper.import",
-        "key": "ctrl+alt+i",
-        "when": "editorTextFocus"
-      },
-      {
-        "command": "phpNamespaceHelper.importAll",
-        "key": "ctrl+alt+a",
-        "when": "editorTextFocus"
-      },
-      {
-        "command": "phpNamespaceHelper.expand",
-        "key": "ctrl+alt+e",
-        "when": "editorTextFocus"
-      },
-      {
-        "command": "phpNamespaceHelper.sort",
-        "key": "ctrl+alt+s",
-        "when": "editorTextFocus"
-      },
-      {
-        "command": "phpNamespaceHelper.generateNamespace",
-        "key": "ctrl+alt+g",
-        "when": "editorTextFocus"
       }
     ],
     "configuration": {
@@ -212,28 +180,31 @@
     }
   },
   "scripts": {
-    "vscode:prepublish": "yarn run compile",
+    "vscode:prepublish": "npm run compile",
     "compile": "tsc -p ./",
     "watch": "tsc -watch -p ./",
-    "lint": "eslint src --ext ts"
+    "lint": "eslint src --ext ts",
+    "esbuild-base": "esbuild ./src/extension.ts --bundle --outfile=dist/extension.js --external:vscode --format=cjs --platform=node",
+    "esbuild": "npm run esbuild-base -- --sourcemap",
+    "esbuild-watch": "npm run esbuild-base -- --sourcemap --watch"
   },
   "devDependencies": {
     "@types/fs-extra": "^11.0.4",
-    "@types/node": "^20.11.24",
-    "@types/vscode": "^1.87.0",
+    "@types/node": "18.x",
+    "@types/vscode": "^1.68.0",
     "@typescript-eslint/eslint-plugin": "^7.1",
     "@typescript-eslint/parser": "^7.1",
     "@vscode/test-electron": "^2.3.4",
+    "esbuild": "^0.20.1",
     "eslint": "^8.47.0",
-    "fs-extra": "^11.2.0",
     "glob": "^10.3.3",
     "typescript": "^5.1.6"
   },
   "dependencies": {
     "execa": "^8.0.1",
     "find-up": "^7.0.0",
+    "fs-extra": "^11.2.0",
     "natural-orderby": "^3.0.2",
-    "php-parser": "^3.1.5",
-    "typescript": "^5.1.6"
+    "php-parser": "^3.1.5"
   }
 }
