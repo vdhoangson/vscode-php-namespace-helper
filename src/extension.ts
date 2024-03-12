@@ -23,6 +23,8 @@ export async function activate(context: vscode.ExtensionContext) {
   context.subscriptions.push(
     vscode.commands.registerCommand("phpNamespaceHelper.import", async () => {
       if (vscode.window.activeTextEditor?.selections !== undefined) {
+        phpNamespaceHelper.setEditor();
+        phpNamespaceHelper.setAST();
         for (const element of vscode.window.activeTextEditor.selections) {
           await phpNamespaceHelper.importCommand(element);
         }

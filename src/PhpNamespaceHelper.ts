@@ -11,7 +11,7 @@ import { findComposerFileByUri, getComposerFileData } from "./helpers/composer";
 import * as vscode from "vscode";
 import * as Parser from "./Parser";
 import { compare } from "natural-orderby";
-import path from 'node:path';
+import path from "node:path";
 import builtInClasses from "./BuildInClasses";
 import fs from "fs-extra";
 
@@ -123,8 +123,6 @@ export class PhpNamespaceHelper {
   }
 
   async importCommand(selected: vscode.Selection) {
-    this.setEditor();
-    this.setAST();
     let resolving = this.resolving(selected);
 
     if (resolving === undefined) {
@@ -162,6 +160,7 @@ export class PhpNamespaceHelper {
   async importAllCommand() {
     this.setEditor();
     this.setAST();
+
     const { useStatements, declarationLines } = this.getDeclarations();
     let phpClasses = this.getPhpClasses(declarationLines);
     this.multiImporting = true;
@@ -179,6 +178,7 @@ export class PhpNamespaceHelper {
         if (phpClass === phpClasses[phpClasses?.length - 1]) {
           this.multiImporting = false;
         }
+
         try {
           await this.importCommand(phpClass);
         } catch (error: any) {
@@ -319,7 +319,8 @@ export class PhpNamespaceHelper {
 
     if (this.config("autoSort")) {
       this.setEditor();
-      this.sortImports();
+      this.setAST();
+      await this.sortImports();
     }
 
     if (!this.multiImporting) {
@@ -399,6 +400,7 @@ export class PhpNamespaceHelper {
         );
       }
     }
+
     await this.replaceEditor(
       editor.document.getWordRangeAtPosition(
         selection.active,
@@ -596,7 +598,7 @@ export class PhpNamespaceHelper {
     return parsedNamespaces;
   }
 
-  sortImports() {
+  async sortImports() {
     if (this.multiImporting) {
       return;
     }
@@ -606,7 +608,9 @@ export class PhpNamespaceHelper {
     if (useStatements?.length <= 1) {
       throw new Error("Nothing to sort.");
     }
+
     const sortAlphabetically = this.config("sort") === "alphabet";
+
     let sortFunction = (a: any, b: any) => {
       const aText = a.text;
       const bText = b.text;
@@ -654,38 +658,28 @@ export class PhpNamespaceHelper {
 
     let sorted = useStatements.slice().sort(sortFunction);
 
-    this.EDITOR?.edit(
+    await this.EDITOR?.edit(
       (textEdit) => {
-        for (let i = 0; i < sorted?.length; i++) {
-          try {
-            const sortItem = sorted[i];
-            const item = useStatements[i];
+        for (let i = 0; i < sorted.length; i++) {
+          const sortItem = sorted[i];
+          const item = useStatements[i];
 
-            let itemLength = item.text?.length + 4; // 'use '
+          let itemLength = item.text.length + 4; // 'use '
 
-            if (item.alias) {
-              itemLength += item.alias?.length + 4; // ' as '
-            }
-
-            let sortText = `use ${sortItem.text}`;
-
-            if (sortItem.alias) {
-              sortText += ` as ${sortItem.alias}`;
-            }
-
-            textEdit.replace(
-              new vscode.Range(
-                useStatements[i].line,
-                0,
-                useStatements[i].line,
-                itemLength
-              ),
-              sortText
-            );
-          } catch (error: any) {
-            console.log(error);
-            continue;
+          if (item.alias) {
+            itemLength += item.alias.length + 4; // ' as '
           }
+
+          let sortText = `use ${sortItem.text}`;
+
+          if (sortItem.alias) {
+            sortText += ` as ${sortItem.alias}`;
+          }
+
+          textEdit.replace(
+            new vscode.Range(item.line, 0, item.line, itemLength),
+            sortText
+          );
         }
       },
       { undoStopBefore: false, undoStopAfter: false }
