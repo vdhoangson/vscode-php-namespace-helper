@@ -29,8 +29,6 @@ export class PhpNamespaceHelper {
   CWD!: string;
 
   constructor() {
-    this.setEditor();
-
     try {
       this.CWD = vscode.workspace.workspaceFolders![0].uri.fsPath;
     } catch (error) {
@@ -40,20 +38,18 @@ export class PhpNamespaceHelper {
     this.getPHPClassList();
   }
 
-  setEditor() {
+  setEditorAndAST() {
     const editor: any = vscode.window.activeTextEditor;
 
     this.EDITOR = editor;
-  }
 
-  setAST() {
     try {
       this.CLASS_AST = Parser.buildClassASTFromContent(
-        this.EDITOR.document.getText()
+        editor.document.getText()
       );
     } catch (error: any) {
       this.showMessage(error.message, true);
-      outputChannel.appendLine(error.message);
+      console.error(error);
       throw new Error();
     }
   }
@@ -92,14 +88,13 @@ export class PhpNamespaceHelper {
       return JSON.parse(stdout);
     } catch (error: any) {
       console.error(error);
-      outputChannel.replace(error.message);
-      outputChannel.show();
+      // outputChannel.replace(error.message);
+      // outputChannel.show();
     }
   }
 
   async expandCommand(selection: vscode.Selection) {
-    this.setEditor();
-    this.setAST();
+    this.setEditorAndAST();
 
     const resolving = this.resolving(selection);
 
@@ -150,7 +145,6 @@ export class PhpNamespaceHelper {
       fileNameSpace = await this.pickClass(namespaces);
     }
 
-    outputChannel.replace("Import class");
     return this.importClass(selected, fileNameSpace, replaceClassAfterImport);
   }
 
@@ -158,8 +152,7 @@ export class PhpNamespaceHelper {
    * Import all class
    */
   async importAllCommand() {
-    this.setEditor();
-    this.setAST();
+    this.setEditorAndAST();
 
     const { useStatements, declarationLines } = this.getDeclarations();
     let phpClasses = this.getPhpClasses(declarationLines);
@@ -174,18 +167,22 @@ export class PhpNamespaceHelper {
 
       phpClasses = [...new Set(phpClasses)];
 
-      for (let phpClass of phpClasses) {
-        if (phpClass === phpClasses[phpClasses?.length - 1]) {
-          this.multiImporting = false;
-        }
+      if (phpClasses?.length > 0) {
+        for (let phpClass of phpClasses) {
+          if (phpClass === phpClasses[phpClasses?.length - 1]) {
+            this.multiImporting = false;
+          }
 
-        try {
-          await this.importCommand(phpClass);
-        } catch (error: any) {
-          console.error(error);
-          this.showErrorMessage(`${phpClass} can not found!`);
-          continue;
+          try {
+            await this.importCommand(phpClass);
+          } catch (error: any) {
+            console.error(error);
+            this.showErrorMessage(`${phpClass} can not found!`);
+            continue;
+          }
         }
+      } else {
+        this.showMessage(`No more class need import!`);
       }
     }
   }
@@ -318,8 +315,7 @@ export class PhpNamespaceHelper {
     await this.insertEditor(insertLine, text);
 
     if (this.config("autoSort")) {
-      this.setEditor();
-      this.setAST();
+      this.setEditorAndAST();
       await this.sortImports();
     }
 
@@ -490,17 +486,17 @@ export class PhpNamespaceHelper {
   }
 
   async sortCommand() {
+    this.setEditorAndAST();
+
     try {
-      this.setEditor();
-      this.setAST();
       await this.sortImports();
+
+      // if (!this.config("autoSort")) {
+      await this.showMessage("Imports are sorted.");
+      // }
     } catch (error: any) {
       console.log(error);
       return this.showErrorMessage(error.message);
-    }
-
-    if (!this.config("autoSort")) {
-      this.showMessage("Imports are sorted.");
     }
   }
 
@@ -530,7 +526,7 @@ export class PhpNamespaceHelper {
 
   pickClass(namespaces: any) {
     return new Promise((resolve, reject) => {
-      if (namespaces?.length === 1) {
+      if (namespaces.length === 1) {
         // Only one namespace found so no need to show picker.
         return resolve(namespaces[0]);
       }
@@ -867,7 +863,7 @@ export class PhpNamespaceHelper {
         await editor.edit(
           (textEdit: any) => {
             textEdit.replace(
-              Parser.getRangeFromLoc(
+              Parser.getRangeFromLocation(
                 declarationLines.namespace.loc.start,
                 declarationLines.namespace.loc.end
               ),

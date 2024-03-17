@@ -2,7 +2,7 @@
   "name": "php-namespace-helper",
   "displayName": "PHP Namespace Helper",
   "description": "Import and expand php namespaces",
-  "version": "1.1.3",
+  "version": "1.1.4",
   "publisher": "vdhoangson",
   "author": "vdhoangson",
   "license": "MIT",
@@ -35,7 +35,12 @@
   },
   "activationEvents": [
     "onLanguage:php",
-    "onStartupFinished"
+    "workspaceContains:composer.json",
+    "onCommand.phpNamespaceHelper.import",
+    "onCommand:phpNamespaceHelper.importAll",
+    "onCommand:phpNamespaceHelper.expand",
+    "onCommand:phpNamespaceHelper.sort",
+    "onCommand:phpNamespaceHelper.generateNamespace"
   ],
   "main": "./out/extension",
   "icon": "images/icon.png",
@@ -134,7 +139,7 @@
         "phpNamespaceHelper.sortOnSave": {
           "type": "boolean",
           "default": true,
-          "description": "Auto sort when a file is saved"
+          "description": "Auto sort when a file is saved. It not work when you enable files.autoSave."
         },
         "phpNamespaceHelper.command": {
           "type": "string",
@@ -180,11 +185,11 @@
     }
   },
   "scripts": {
-    "vscode:prepublish": "npm run compile",
+    "vscode:prepublish": "npm run esbuild-base -- --minify",
     "compile": "tsc -p ./",
     "watch": "tsc -watch -p ./",
     "lint": "eslint src --ext ts",
-    "esbuild-base": "esbuild ./src/extension.ts --bundle --outfile=dist/extension.js --external:vscode --format=cjs --platform=node",
+    "esbuild-base": "esbuild ./src/extension.ts --bundle --outfile=out/extension.js --external:vscode --format=cjs --platform=node",
     "esbuild": "npm run esbuild-base -- --sourcemap",
     "esbuild-watch": "npm run esbuild-base -- --sourcemap --watch"
   },

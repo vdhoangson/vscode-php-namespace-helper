@@ -3,18 +3,11 @@
 import * as vscode from "vscode";
 import PhpNamespaceHelper from "./PhpNamespaceHelper";
 
-const outputChannel = vscode.window.createOutputChannel(
-  "PHP Namespace Helper",
-  "log"
-);
-
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
 export async function activate(context: vscode.ExtensionContext) {
-  outputChannel.appendLine("Init extension PhpNamespaceHelper");
-
   const createDiagnosticCollection =
-    vscode.languages.createDiagnosticCollection("PhpNamespaceHelper");
+    vscode.languages.createDiagnosticCollection("phpNamespaceHelper");
 
   context.subscriptions.push(createDiagnosticCollection);
 
@@ -23,8 +16,7 @@ export async function activate(context: vscode.ExtensionContext) {
   context.subscriptions.push(
     vscode.commands.registerCommand("phpNamespaceHelper.import", async () => {
       if (vscode.window.activeTextEditor?.selections !== undefined) {
-        phpNamespaceHelper.setEditor();
-        phpNamespaceHelper.setAST();
+        phpNamespaceHelper.setEditorAndAST();
         for (const element of vscode.window.activeTextEditor.selections) {
           await phpNamespaceHelper.importCommand(element);
         }
@@ -70,7 +62,8 @@ export async function activate(context: vscode.ExtensionContext) {
         event.document.languageId === "php" &&
         vscode.workspace
           .getConfiguration("phpNamespaceHelper")
-          .get("sortOnSave")
+          .get("sortOnSave") &&
+        !vscode.workspace.getConfiguration("files").get("autoSave")
       ) {
         await phpNamespaceHelper.sortCommand();
       }

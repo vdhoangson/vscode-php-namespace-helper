@@ -19,6 +19,7 @@ export function buildClassASTFromContent(content: string) {
     const AST = Parser.parseCode(content, "*.php");
 
     const _tag: any = AST.tokens!.find((item: any) => item[0] === "T_OPEN_TAG");
+
     const _declare: any = AST.children!.find(
       (item: any) => item.kind === "declare"
     );
@@ -50,15 +51,14 @@ export function buildClassASTFromContent(content: string) {
       },
       _declare: _declare,
       _namespace: _namespace
-        ? getNamespaceLoc(_namespace, _use![0] || _class)
+        ? getNamespaceLocation(_namespace, _use![0] || _class)
         : null,
       _class: _class,
       _use: _use,
       _trait: _trait,
     };
   } catch (error: any) {
-    // console.error(error);
-    throw new Error(error);
+    console.error(error);
   }
 }
 
@@ -68,7 +68,7 @@ export function getNamespaceInfo(content: any) {
   return AST.children?.find((item: any) => item.kind === "namespace");
 }
 
-function getNamespaceLoc(start: any, end: any) {
+function getNamespaceLocation(start: any, end: any) {
   const line = end.leadingComments
     ? end.leadingComments[0].loc.start.line
     : end.loc.start.line;
@@ -81,7 +81,7 @@ function getNamespaceLoc(start: any, end: any) {
   };
 }
 
-export function getRangeFromLoc(
+export function getRangeFromLocation(
   start: { line: number; column: number },
   end: { line: number; column: number }
 ): vscode.Range {
