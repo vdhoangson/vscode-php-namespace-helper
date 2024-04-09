@@ -62,13 +62,21 @@ export async function activate(context: vscode.ExtensionContext) {
         event.document.languageId === "php" &&
         vscode.workspace
           .getConfiguration("phpNamespaceHelper")
-          .get("sortOnSave") &&
-        !vscode.workspace.getConfiguration("files").get("autoSave")
+          .get("sortOnSave")
       ) {
         await phpNamespaceHelper.sortCommand();
       }
     })
   );
+
+  return {
+    getNamespace(uri?: vscode.Uri) {
+      return phpNamespaceHelper.generateNamespaceCommand(true, uri);
+    },
+    insertNamespace() {
+      return phpNamespaceHelper.generateNamespaceCommand();
+    },
+  };
 }
 
 // This method is called when your extension is deactivated

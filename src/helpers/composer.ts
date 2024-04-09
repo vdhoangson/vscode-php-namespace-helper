@@ -1,12 +1,12 @@
 import * as vscode from "vscode";
 import * as fs from "fs-extra";
+const findUp = import("find-up");
 
 export async function findComposerFileByUri(
   currentUri: vscode.Uri,
   ignoreError = true
 ): Promise<string | undefined> {
-  const { findUp } = await require("find-up");
-  const composerFile = findUp("composer.json", { cwd: currentUri.path });
+  const composerFile = (await findUp).findUp("composer.json", { cwd: currentUri.path });
 
   if (!composerFile) {
     if (!ignoreError) {

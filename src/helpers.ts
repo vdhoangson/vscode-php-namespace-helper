@@ -82,3 +82,13 @@ export function getFromReturnType(text: string, builtInClasses: any) {
 
   return phpClasses;
 }
+
+export function uniqueArray(arr: Array<any>) {
+  let unique = arr.reduce(function (acc: any, curr: any) {
+    if (!acc.includes(curr)) {
+      acc.push(curr);
+    }
+    return acc;
+  }, []);
+  return unique;
+}

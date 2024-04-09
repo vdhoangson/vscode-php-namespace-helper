@@ -6,6 +6,7 @@ import {
   getFromInstanceofOperator,
   getFromTypeHints,
   getFromReturnType,
+  uniqueArray,
 } from "./helpers";
 import { findComposerFileByUri, getComposerFileData } from "./helpers/composer";
 import * as vscode from "vscode";
@@ -156,6 +157,7 @@ export class PhpNamespaceHelper {
 
     const { useStatements, declarationLines } = this.getDeclarations();
     let phpClasses = this.getPhpClasses(declarationLines);
+
     this.multiImporting = true;
 
     if (phpClasses?.length > 0) {
@@ -225,7 +227,8 @@ export class PhpNamespaceHelper {
     phpClasses = phpClasses.concat(
       declarationLines.trait?.map((item: any) => item.name)
     );
-    return phpClasses.filter((item: any) => item);
+
+    return uniqueArray(phpClasses);
   }
 
   importClass(
@@ -391,7 +394,7 @@ export class PhpNamespaceHelper {
         return;
       } else {
         return this.showMessage(
-          `use statement '${similarImport.text}' already exists`,
+          `Use statement '${similarImport.text}' already exists`,
           true
         );
       }
@@ -491,9 +494,9 @@ export class PhpNamespaceHelper {
     try {
       await this.sortImports();
 
-      // if (!this.config("autoSort")) {
-      await this.showMessage("Imports are sorted.");
-      // }
+      if (!this.config("autoSort")) {
+        await this.showMessage("Imports are sorted.");
+      }
     } catch (error: any) {
       console.log(error);
       return this.showErrorMessage(error.message);
@@ -526,7 +529,7 @@ export class PhpNamespaceHelper {
 
   pickClass(namespaces: any) {
     return new Promise((resolve, reject) => {
-      if (namespaces.length === 1) {
+      if (namespaces?.length === 1) {
         // Only one namespace found so no need to show picker.
         return resolve(namespaces[0]);
       }
@@ -811,8 +814,12 @@ export class PhpNamespaceHelper {
   }
 
   async generateNamespaceCommand(returnDontInsert = false, uri?: vscode.Uri) {
+    if (!returnDontInsert) {
+      this.setEditorAndAST();
+    }
+
     const editor: any = this.EDITOR;
-    const currentUri: vscode.Uri = uri || editor?.document.uri;
+    const currentUri: vscode.Uri = uri || editor.document.uri;
 
     let composerFile;
     let psr4;
@@ -834,6 +841,7 @@ export class PhpNamespaceHelper {
         returnDontInsert
       );
     } catch (error) {
+      console.error(error);
       if (this.config("useFolderTree")) {
         ns = this.getFileDirFromPath(currentUri.path.replace(this.CWD, ""))
           .replace(/^\//gm, "")
@@ -850,7 +858,7 @@ export class PhpNamespaceHelper {
 
     ns = this.config("namespacePrefix") + ns;
 
-    const namespace = "\n" + "namespace " + ns + ";" + "\n";
+    const namespace = "namespace " + ns + ";\n";
 
     if (returnDontInsert) {
       return namespace;
@@ -860,7 +868,7 @@ export class PhpNamespaceHelper {
       const { declarationLines } = this.getDeclarations();
 
       if (declarationLines.namespace !== null) {
-        await editor.edit(
+        return await editor.edit(
           (textEdit: any) => {
             textEdit.replace(
               Parser.getRangeFromLocation(
@@ -879,7 +887,7 @@ export class PhpNamespaceHelper {
           line = declarationLines.declare.loc.end.line;
         }
 
-        await editor.edit(
+        return await editor.edit(
           (textEdit: any) =>
             textEdit.insert(new vscode.Position(line, 0), namespace),
           { undoStopBefore: false, undoStopAfter: false }

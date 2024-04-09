@@ -2,7 +2,7 @@
   "name": "php-namespace-helper",
   "displayName": "PHP Namespace Helper",
   "description": "Import and expand php namespaces",
-  "version": "1.1.4",
+  "version": "1.1.5",
   "publisher": "vdhoangson",
   "author": "vdhoangson",
   "license": "MIT",
@@ -35,7 +35,6 @@
   },
   "activationEvents": [
     "onLanguage:php",
-    "workspaceContains:composer.json",
     "onCommand.phpNamespaceHelper.import",
     "onCommand:phpNamespaceHelper.importAll",
     "onCommand:phpNamespaceHelper.expand",
@@ -169,7 +168,7 @@
             "string"
           ],
           "default": "",
-          "markdownDescription": "add a prefix for all generated namespaces\n\nex.`My\\Project\\`"
+          "markdownDescription": "Add a prefix for all generated namespaces\n\nEx.`My\\Project\\`"
         },
         "phpNamespaceHelper.removePath": {
           "type": "array",

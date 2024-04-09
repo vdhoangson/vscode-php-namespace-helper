@@ -1,8 +1,10 @@
+/* eslint-disable @typescript-eslint/naming-convention */
 import * as PhpParser from "php-parser";
 import * as vscode from "vscode";
 
 const Parser = new PhpParser.Engine({
   parser: {
+    debug: true,
     locations: true,
     extractDoc: true,
     extractTokens: true,
@@ -10,7 +12,6 @@ const Parser = new PhpParser.Engine({
   },
   ast: {
     withPositions: true,
-    withSource: true,
   },
 });
 
@@ -58,7 +59,7 @@ export function buildClassASTFromContent(content: string) {
       _trait: _trait,
     };
   } catch (error: any) {
-    console.error(error);
+    throw new Error(error);
   }
 }
 
