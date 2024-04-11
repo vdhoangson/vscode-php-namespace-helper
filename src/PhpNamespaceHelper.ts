@@ -281,12 +281,14 @@ export class PhpNamespaceHelper {
    * @param text
    */
   async insertEditor(insertLine: any, text: string) {
-    await this.EDITOR.edit(
-      (textEdit) => {
-        textEdit.insert(new vscode.Position(insertLine, 0), `${text};\n`);
-      },
-      { undoStopBefore: false, undoStopAfter: false }
-    );
+    if (text.length > 0) {
+      await this.EDITOR.edit(
+        (textEdit) => {
+          textEdit.insert(new vscode.Position(insertLine, 0), `${text};\n`);
+        },
+        { undoStopBefore: false, undoStopAfter: false }
+      );
+    }
   }
 
   /**
@@ -295,12 +297,14 @@ export class PhpNamespaceHelper {
    * @param text
    */
   async replaceEditor(position: any, text: string) {
-    await this.EDITOR.edit(
-      (textEdit) => {
-        textEdit.replace(position, `${text};\n`);
-      },
-      { undoStopBefore: false, undoStopAfter: false }
-    );
+    if (text.length > 0) {
+      await this.EDITOR.edit(
+        (textEdit) => {
+          textEdit.replace(position, `${text};\n`);
+        },
+        { undoStopBefore: false, undoStopAfter: false }
+      );
+    }
   }
 
   async insert(

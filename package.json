@@ -2,9 +2,13 @@
   "name": "php-namespace-helper",
   "displayName": "PHP Namespace Helper",
   "description": "Import and expand php namespaces",
-  "version": "1.1.5",
+  "version": "1.1.6",
   "publisher": "vdhoangson",
   "author": "vdhoangson",
+  "sponsor": {
+    "url": "https://github.com/sponsors/vdhoangson"
+  },
+  "pricing": "Free",
   "license": "MIT",
   "engines": {
     "vscode": "^1.68.0"
