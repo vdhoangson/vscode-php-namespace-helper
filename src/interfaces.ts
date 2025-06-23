@@ -1,5 +1,5 @@
 export interface DeclarationLines {
-  PHPTag?: any;
+  phpTag?: any;
   declare?: any;
   namespace?: any;
   useStatement?: any;
