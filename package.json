@@ -2,7 +2,7 @@
   "name": "php-namespace-helper",
   "displayName": "PHP Namespace Helper",
   "description": "Import and expand php namespaces",
-  "version": "1.2.0",
+  "version": "2.0.0",
   "publisher": "vdhoangson",
   "author": "vdhoangson",
   "sponsor": {
