@@ -2,7 +2,7 @@
   "name": "php-namespace-helper",
   "displayName": "PHP Namespace Helper",
   "description": "Import and expand php namespaces",
-  "version": "1.1.6",
+  "version": "1.2.0",
   "publisher": "vdhoangson",
   "author": "vdhoangson",
   "sponsor": {
@@ -11,7 +11,8 @@
   "pricing": "Free",
   "license": "MIT",
   "engines": {
-    "vscode": "^1.68.0"
+    "vscode": "^1.85.0",
+    "vscode.api": "1.85.0"
   },
   "repository": {
     "type": "git",
@@ -38,12 +39,7 @@
     "theme": "dark"
   },
   "activationEvents": [
-    "onLanguage:php",
-    "onCommand.phpNamespaceHelper.import",
-    "onCommand:phpNamespaceHelper.importAll",
-    "onCommand:phpNamespaceHelper.expand",
-    "onCommand:phpNamespaceHelper.sort",
-    "onCommand:phpNamespaceHelper.generateNamespace"
+    "onLanguage:php"
   ],
   "main": "./out/extension",
   "icon": "images/icon.png",
@@ -97,6 +93,17 @@
       {
         "title": "Generate namespace for this file",
         "command": "phpNamespaceHelper.generateNamespace"
+      }
+    ],
+    "colors": [
+      {
+        "id": "phpNamespaceHelper.unimportedClassBackground",
+        "description": "Background color for unimported PHP classes",
+        "defaults": {
+          "dark": "#5a1d1d",
+          "light": "#ffd6d6",
+          "highContrast": "#ff0000"
+        }
       }
     ],
     "configuration": {
@@ -183,6 +190,11 @@
           "minItems": 0,
           "uniqueItems": true,
           "markdownDescription": "remove parts from the namespace by regex\n\nex.`remove 'V[0-9]+(\\\\)?' from My\\Project\\V100400\\Folder`"
+        },
+        "phpNamespaceHelper.highlightUnimportedClasses": {
+          "type": "boolean",
+          "default": true,
+          "description": "Highlight unimported classes with a red background"
         }
       }
     }
@@ -199,7 +211,7 @@
   "devDependencies": {
     "@types/fs-extra": "^11.0.4",
     "@types/node": "18.x",
-    "@types/vscode": "^1.68.0",
+    "@types/vscode": "^1.85.0",
     "@typescript-eslint/eslint-plugin": "^7.1",
     "@typescript-eslint/parser": "^7.1",
     "@vscode/test-electron": "^2.3.4",
@@ -209,10 +221,10 @@
     "typescript": "^5.3.3"
   },
   "dependencies": {
-    "execa": "^8.0.1",
+    "execa": "^9.6.0",
     "find-up": "^7.0.0",
     "fs-extra": "^11.3.0",
-    "natural-orderby": "^3.0.2",
-    "php-parser": "^3.2.0"
+    "natural-orderby": "^5.0.0",
+    "php-parser": "^3.2.3"
   }
 }

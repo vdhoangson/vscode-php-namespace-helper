@@ -23,29 +23,33 @@ const outputChannel = vscode.window.createOutputChannel(
 );
 
 export class PhpNamespaceHelper {
-  BUILT_IN_CLASSES: any = builtInClasses;
-  EDITOR!: vscode.TextEditor;
-  CLASS_AST: any;
+  builtInClasses: any = builtInClasses;
+  editor!: vscode.TextEditor;
+  classAst: any;
   multiImporting: boolean = false;
-  CWD!: string;
+  cwd!: string;
+  diagnosticCollection: vscode.DiagnosticCollection;
 
-  constructor() {
+  constructor(diagnosticCollection?: vscode.DiagnosticCollection) {
     try {
-      this.CWD = vscode.workspace.workspaceFolders![0].uri.fsPath;
+      this.cwd = vscode.workspace.workspaceFolders![0].uri.fsPath;
     } catch (error) {
-      this.CWD = "";
+      this.cwd = "";
     }
 
     this.getPHPClassList();
+    this.diagnosticCollection =
+      diagnosticCollection ||
+      vscode.languages.createDiagnosticCollection("phpNamespaceHelper");
   }
 
   setEditorAndAST() {
     const editor: any = vscode.window.activeTextEditor;
 
-    this.EDITOR = editor;
+    this.editor = editor;
 
     try {
-      this.CLASS_AST = Parser.buildClassASTFromContent(
+      this.classAst = Parser.buildClassASTFromContent(
         editor.document.getText()
       );
     } catch (error: any) {
@@ -62,7 +66,7 @@ export class PhpNamespaceHelper {
         async (method: any) => await this.runPhpCli(method)
       )
     )
-      .then((_data) => (this.BUILT_IN_CLASSES = _data.flat()))
+      .then((_data) => (this.builtInClasses = _data.flat()))
       .catch((error: any) => {
         console.error(error);
         outputChannel.appendLine(error.message);
@@ -81,7 +85,7 @@ export class PhpNamespaceHelper {
       const { stdout } = await execaCommand(
         `${phpCommand} -r "echo json_encode(${method});"`,
         {
-          cwd: this.CWD,
+          cwd: this.cwd,
           shell: vscode.env.shell,
         }
       );
@@ -93,8 +97,9 @@ export class PhpNamespaceHelper {
       // outputChannel.show();
     }
   }
-
-  async expandCommand(selection: vscode.Selection) {
+  async expandCommand(
+    selection: vscode.Selection
+  ): Promise<vscode.Disposable | void> {
     this.setEditorAndAST();
 
     const resolving = this.resolving(selection);
@@ -117,7 +122,6 @@ export class PhpNamespaceHelper {
 
     await this.changeSelectedClass(selection, fileNameSpace, true);
   }
-
   async importCommand(selected: vscode.Selection) {
     let resolving = this.resolving(selected);
 
@@ -146,9 +150,21 @@ export class PhpNamespaceHelper {
       fileNameSpace = await this.pickClass(namespaces);
     }
 
-    return this.importClass(selected, fileNameSpace, replaceClassAfterImport);
-  }
+    const result = await this.importClass(
+      selected,
+      fileNameSpace,
+      replaceClassAfterImport
+    );
 
+    // Update diagnostics after import
+    if (vscode.window.activeTextEditor) {
+      await this.highlightUnimportedClasses(
+        vscode.window.activeTextEditor.document
+      );
+    }
+
+    return result;
+  }
   /**
    * Import all class
    */
@@ -183,6 +199,13 @@ export class PhpNamespaceHelper {
             continue;
           }
         }
+
+        // Update diagnostics after importing all classes
+        if (vscode.window.activeTextEditor) {
+          await this.highlightUnimportedClasses(
+            vscode.window.activeTextEditor.document
+          );
+        }
       } else {
         this.showMessage(`No more class need import!`);
       }
@@ -195,7 +218,7 @@ export class PhpNamespaceHelper {
    * @returns
    */
   getPhpClasses(declarationLines: DeclarationLines) {
-    const text = this.EDITOR.document.getText();
+    const text = this.editor.document.getText();
     const _class = declarationLines.class;
     let phpClasses: any = [];
 
@@ -218,11 +241,9 @@ export class PhpNamespaceHelper {
     phpClasses = phpClasses.concat(getInitializedWithNew(text));
     phpClasses = phpClasses.concat(getFromStaticCalls(text));
     phpClasses = phpClasses.concat(getFromInstanceofOperator(text));
+    phpClasses = phpClasses.concat(getFromTypeHints(text, this.builtInClasses));
     phpClasses = phpClasses.concat(
-      getFromTypeHints(text, this.BUILT_IN_CLASSES)
-    );
-    phpClasses = phpClasses.concat(
-      getFromReturnType(text, this.BUILT_IN_CLASSES)
+      getFromReturnType(text, this.builtInClasses)
     );
     phpClasses = phpClasses.concat(
       declarationLines.trait?.map((item: any) => item.name)
@@ -282,7 +303,7 @@ export class PhpNamespaceHelper {
    */
   async insertEditor(insertLine: any, text: string) {
     if (text.length > 0) {
-      await this.EDITOR.edit(
+      await this.editor.edit(
         (textEdit) => {
           textEdit.insert(new vscode.Position(insertLine, 0), `${text};\n`);
         },
@@ -298,7 +319,7 @@ export class PhpNamespaceHelper {
    */
   async replaceEditor(position: any, text: string) {
     if (text.length > 0) {
-      await this.EDITOR.edit(
+      await this.editor.edit(
         (textEdit) => {
           textEdit.replace(position, `${text};\n`);
         },
@@ -306,12 +327,11 @@ export class PhpNamespaceHelper {
       );
     }
   }
-
   async insert(
     fileNameSpace: string,
     declarationLines: DeclarationLines,
     alias: string | undefined = undefined
-  ) {
+  ): Promise<vscode.Disposable | void> {
     const insertLine = this.getInsertLine(declarationLines);
     let text = `use ${fileNameSpace}`;
 
@@ -324,6 +344,13 @@ export class PhpNamespaceHelper {
     if (this.config("autoSort")) {
       this.setEditorAndAST();
       await this.sortImports();
+    }
+
+    // Update diagnostics after inserting import
+    if (vscode.window.activeTextEditor) {
+      await this.highlightUnimportedClasses(
+        vscode.window.activeTextEditor.document
+      );
     }
 
     if (!this.multiImporting) {
@@ -371,12 +398,12 @@ export class PhpNamespaceHelper {
     fileNameSpace: any,
     useStatements: Array<any>,
     declarationLines: DeclarationLines
-  ) {
+  ): Promise<vscode.Disposable | void> {
     if (useStatements.find((use) => use.text === fileNameSpace)) {
       return this.showMessage(`'${fileNameSpace}' already exists`, true);
     }
 
-    const editor = this.EDITOR;
+    const editor = this.editor;
     const classBaseName = fileNameSpace.match(/(\w+)/g).pop();
     const similarImport = useStatements.find(
       (use) =>
@@ -416,12 +443,12 @@ export class PhpNamespaceHelper {
   }
 
   async replaceNamespaceStatement(namespace: any, line: any) {
-    if (this.EDITOR) {
+    if (this.editor) {
       let realLine = line - 1;
-      let text = this.EDITOR.document.lineAt(realLine).text;
+      let text = this.editor.document.lineAt(realLine).text;
       let newNs = text.replace(/namespace (.+)/, namespace);
 
-      await this.EDITOR.edit((textEdit: any) => {
+      await this.editor.edit((textEdit: any) => {
         textEdit.replace(
           new vscode.Range(realLine, 0, realLine, text?.length),
           newNs.trim()
@@ -458,11 +485,11 @@ export class PhpNamespaceHelper {
     replacingClassName: any,
     prependBackslash = false
   ) {
-    await this.EDITOR.edit(
+    await this.editor.edit(
       (textEdit) => {
         textEdit.replace(
           //@ts-ignore
-          this.EDITOR.document.getWordRangeAtPosition(
+          this.editor.document.getWordRangeAtPosition(
             selection.active,
             regexWordWithNamespace
           ),
@@ -489,16 +516,16 @@ export class PhpNamespaceHelper {
       selection.active.character
     );
 
-    this.EDITOR.selection = new vscode.Selection(newPosition, newPosition);
+    this.editor.selection = new vscode.Selection(newPosition, newPosition);
   }
-
   async sortCommand() {
     this.setEditorAndAST();
 
     try {
       await this.sortImports();
 
-      if (!this.config("autoSort")) {
+      // Chỉ hiển thị thông báo khi không đang thực hiện import nhiều class
+      if (!this.multiImporting) {
         await this.showMessage("Imports are sorted.");
       }
     } catch (error: any) {
@@ -530,9 +557,8 @@ export class PhpNamespaceHelper {
 
     return parsedNamespaces;
   }
-
   pickClass(namespaces: any) {
-    return new Promise((resolve, reject) => {
+    return new Promise<string>((resolve) => {
       if (namespaces?.length === 1) {
         // Only one namespace found so no need to show picker.
         return resolve(namespaces[0]);
@@ -587,7 +613,7 @@ export class PhpNamespaceHelper {
     }
 
     // If selected text is a built-in php class add that at the beginning.
-    if (this.BUILT_IN_CLASSES.includes(className)) {
+    if (this.builtInClasses.includes(className)) {
       parsedNamespaces.unshift(className);
     }
 
@@ -600,12 +626,7 @@ export class PhpNamespaceHelper {
 
     return parsedNamespaces;
   }
-
   async sortImports() {
-    if (this.multiImporting) {
-      return;
-    }
-
     const { useStatements } = this.getDeclarations();
 
     if (useStatements?.length <= 1) {
@@ -661,7 +682,7 @@ export class PhpNamespaceHelper {
 
     let sorted = useStatements.slice().sort(sortFunction);
 
-    await this.EDITOR?.edit(
+    await this.editor?.edit(
       (textEdit) => {
         for (let i = 0; i < sorted.length; i++) {
           const sortItem = sorted[i];
@@ -711,7 +732,7 @@ export class PhpNamespaceHelper {
 
   getUseStatementsArray(): Array<any> {
     let useStatements = [];
-    const document = this.EDITOR?.document;
+    const document = this.editor?.document;
     const lineCount = document?.lineCount || 0;
 
     for (let line = 0; line < lineCount; line++) {
@@ -735,12 +756,12 @@ export class PhpNamespaceHelper {
   getDeclarations(): any {
     const useStatements: any = [];
     let declarationLines: DeclarationLines = {
-      PHPTag: this.CLASS_AST._openTag,
-      declare: this.CLASS_AST._declare,
-      namespace: this.CLASS_AST._namespace,
-      useStatement: this.CLASS_AST._use,
-      class: this.CLASS_AST._class,
-      trait: this.CLASS_AST._trait,
+      phpTag: this.classAst._openTag,
+      declare: this.classAst._declare,
+      namespace: this.classAst._namespace,
+      useStatement: this.classAst._use,
+      class: this.classAst._class,
+      trait: this.classAst._trait,
     };
 
     //@ts-ignore
@@ -769,9 +790,8 @@ export class PhpNamespaceHelper {
     if (_class) {
       return _class.loc.start.line - 1;
     }
-
     const namespaceOrTag =
-      declarationLines.namespace || declarationLines.PHPTag;
+      declarationLines.namespace || declarationLines.phpTag;
 
     if (namespaceOrTag) {
       return namespaceOrTag.loc.end.line;
@@ -783,7 +803,7 @@ export class PhpNamespaceHelper {
       return selection;
     }
 
-    let wordRange = this.EDITOR.document.getWordRangeAtPosition(
+    let wordRange = this.editor.document.getWordRangeAtPosition(
       selection.active,
       regexWordWithNamespace
     );
@@ -792,14 +812,13 @@ export class PhpNamespaceHelper {
       return;
     }
 
-    return this.EDITOR?.document.getText(wordRange);
+    return this.editor?.document.getText(wordRange);
   }
 
   config(key: string) {
     return vscode.workspace.getConfiguration("phpNamespaceHelper").get(key);
   }
-
-  showMessage(message: string, error = false) {
+  showMessage(message: string, error = false): vscode.Disposable | void {
     if (this.config("showMessageOnStatusBar")) {
       return vscode.window.setStatusBarMessage(message, 3000);
     }
@@ -822,7 +841,7 @@ export class PhpNamespaceHelper {
       this.setEditorAndAST();
     }
 
-    const editor: any = this.EDITOR;
+    const editor: any = this.editor;
     const currentUri: vscode.Uri = uri || editor.document.uri;
 
     let composerFile;
@@ -847,7 +866,7 @@ export class PhpNamespaceHelper {
     } catch (error) {
       console.error(error);
       if (this.config("useFolderTree")) {
-        ns = this.getFileDirFromPath(currentUri.path.replace(this.CWD, ""))
+        ns = this.getFileDirFromPath(currentUri.path.replace(this.cwd, ""))
           .replace(/^\//gm, "")
           .replace(/\//g, "\\");
       } else {
@@ -885,7 +904,7 @@ export class PhpNamespaceHelper {
           { undoStopBefore: false, undoStopAfter: false }
         );
       } else {
-        let line = declarationLines.PHPTag.loc.start.line;
+        let line = declarationLines.phpTag.loc.start.line;
 
         if (declarationLines.declare !== undefined) {
           line = declarationLines.declare.loc.end.line;
@@ -975,6 +994,166 @@ export class PhpNamespaceHelper {
     }
 
     return ns.replace(/\\{2,}/g, "\\");
+  }
+  /**
+   * Highlight unimported classes with a red background
+   * @param document The document to analyze
+   */
+  async highlightUnimportedClasses(document: vscode.TextDocument) {
+    if (
+      document.languageId !== "php" ||
+      !this.config("highlightUnimportedClasses")
+    ) {
+      // Clear diagnostics if feature is turned off
+      this.diagnosticCollection.delete(document.uri);
+      return;
+    }
+
+    // Clear previous diagnostics
+    this.diagnosticCollection.delete(document.uri);
+
+    try {
+      // Use the improved parser functions to find class references
+      const unimportedClasses = Parser.getUnimportedClasses(document);
+      const diagnostics: vscode.Diagnostic[] = [];
+
+      for (const classRef of unimportedClasses) {
+        // Skip if it's in a comment
+        if (classRef.inComment) {
+          continue;
+        }
+
+        // Skip built-in PHP classes
+        if (Parser.isPhpBuiltInClass(classRef.name)) {
+          continue;
+        }
+
+        // Additional context-based filtering
+        const lineText = document.lineAt(classRef.start.line).text;
+
+        // Skip if inside string literals (single or double quotes)
+        const beforeClass = lineText.substring(0, classRef.start.character);
+        const afterClass = lineText.substring(classRef.end.character);
+
+        // Count quotes before the class name
+        const singleQuotesBefore = (beforeClass.match(/'/g) || []).length;
+        const doubleQuotesBefore = (beforeClass.match(/"/g) || []).length;
+
+        // Skip if inside string literals
+        if (singleQuotesBefore % 2 === 1 || doubleQuotesBefore % 2 === 1) {
+          continue;
+        }
+
+        // Skip if it's a class definition, not a usage
+        if (
+          lineText.includes(`class ${classRef.name}`) ||
+          lineText.includes(`interface ${classRef.name}`) ||
+          lineText.includes(`trait ${classRef.name}`) ||
+          lineText.includes(`enum ${classRef.name}`)
+        ) {
+          continue;
+        }
+
+        // Skip if it's a method name or property name
+        if (
+          lineText.includes(`function ${classRef.name}`) ||
+          lineText.includes(`->${classRef.name}`) ||
+          lineText.includes(`::${classRef.name}`)
+        ) {
+          continue;
+        }
+
+        // Skip if it's a constant or variable
+        if (
+          lineText.includes(`const ${classRef.name}`) ||
+          lineText.includes(`$${classRef.name}`)
+        ) {
+          continue;
+        }
+
+        // Skip if it's in array keys or other non-class contexts
+        if (
+          lineText.includes(`'${classRef.name}'`) ||
+          lineText.includes(`"${classRef.name}"`) ||
+          lineText.includes(`[${classRef.name}]`) ||
+          lineText.includes(`['${classRef.name}']`) ||
+          lineText.includes(`["${classRef.name}"]`)
+        ) {
+          continue;
+        }
+
+        // Check if it's in a valid class usage context
+        const validContexts = [
+          "new ",
+          "instanceof ",
+          "extends ",
+          "implements ",
+          "use ",
+          "::class",
+          ": ",
+          "catch (",
+          "throw new ",
+          "function (",
+          ", ",
+          "(",
+          "return ",
+          "= ",
+          "=> ",
+        ];
+
+        const hasValidContext = validContexts.some((context) => {
+          const contextIndex = lineText.indexOf(context + classRef.name);
+          return (
+            contextIndex !== -1 ||
+            (context === ": " &&
+              lineText.indexOf(classRef.name + " ") !== -1) ||
+            (context === "::class" &&
+              lineText.indexOf(classRef.name + "::class") !== -1)
+          );
+        });
+
+        // Only proceed if it's in a valid context or looks like a type hint
+        if (!hasValidContext) {
+          // Check for type hints (parameter or return types)
+          const typeHintRegex = new RegExp(
+            `\\b(function\\s+\\w+\\s*\\([^)]*${classRef.name}\\s+\\$|:\\s*${classRef.name}\\s*[,\\)\\s]|\\b${classRef.name}\\s+\\$)`,
+            "i"
+          );
+          if (!typeHintRegex.test(lineText)) {
+            continue;
+          }
+        }
+
+        // Create a diagnostic for the unimported class
+        const range = new vscode.Range(classRef.start, classRef.end);
+        const diagnostic = new vscode.Diagnostic(
+          range,
+          `Class '${classRef.name}' is not imported.`,
+          vscode.DiagnosticSeverity.Error
+        );
+
+        // Add custom styling with theme color
+        diagnostic.code = "unimported-class";
+
+        // Use custom color theme if available
+        const decoration = {
+          backgroundColor: new vscode.ThemeColor(
+            "phpNamespaceHelper.unimportedClassBackground"
+          ),
+        };
+
+        // @ts-ignore - Private API but widely used for custom decorations
+        diagnostic.renderOptions = { dark: decoration, light: decoration };
+
+        diagnostics.push(diagnostic);
+      }
+
+      // Apply the diagnostics
+      this.diagnosticCollection.set(document.uri, diagnostics);
+    } catch (error) {
+      // Handle errors silently to not disrupt the user
+      console.error("Error highlighting unimported classes:", error);
+    }
   }
 }
 

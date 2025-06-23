@@ -6,13 +6,42 @@ import PhpNamespaceHelper from "./PhpNamespaceHelper";
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
 export async function activate(context: vscode.ExtensionContext) {
-  const createDiagnosticCollection =
+  const diagnosticCollection =
     vscode.languages.createDiagnosticCollection("phpNamespaceHelper");
 
-  context.subscriptions.push(createDiagnosticCollection);
+  context.subscriptions.push(diagnosticCollection);
 
-  const phpNamespaceHelper = new PhpNamespaceHelper();
+  const phpNamespaceHelper = new PhpNamespaceHelper(diagnosticCollection);
 
+  // Highlight unimported classes when a PHP file is opened
+  if (
+    vscode.window.activeTextEditor &&
+    vscode.window.activeTextEditor.document.languageId === "php"
+  ) {
+    phpNamespaceHelper.highlightUnimportedClasses(
+      vscode.window.activeTextEditor.document
+    );
+  }
+
+  // Listen for document changes to update highlights
+  context.subscriptions.push(
+    vscode.workspace.onDidChangeTextDocument((event) => {
+      if (event.document.languageId === "php") {
+        phpNamespaceHelper.highlightUnimportedClasses(event.document);
+      }
+    })
+  );
+
+  // Listen for editor changes to update highlights
+  context.subscriptions.push(
+    vscode.window.onDidChangeActiveTextEditor((editor) => {
+      if (editor && editor.document.languageId === "php") {
+        phpNamespaceHelper.highlightUnimportedClasses(editor.document);
+      }
+    })
+  );
+
+  // Register commands
   context.subscriptions.push(
     vscode.commands.registerCommand("phpNamespaceHelper.import", async () => {
       if (vscode.window.activeTextEditor?.selections !== undefined) {
@@ -54,19 +83,20 @@ export async function activate(context: vscode.ExtensionContext) {
       async () => await phpNamespaceHelper.generateNamespaceCommand()
     )
   );
-
   context.subscriptions.push(
-    vscode.workspace.onWillSaveTextDocument(async (event) => {
-      if (
-        event &&
-        event.document.languageId === "php" &&
-        vscode.workspace
-          .getConfiguration("phpNamespaceHelper")
-          .get("sortOnSave")
-      ) {
-        await phpNamespaceHelper.sortCommand();
+    vscode.workspace.onWillSaveTextDocument(
+      async (event: vscode.TextDocumentWillSaveEvent) => {
+        if (
+          event &&
+          event.document.languageId === "php" &&
+          vscode.workspace
+            .getConfiguration("phpNamespaceHelper")
+            .get("sortOnSave")
+        ) {
+          await phpNamespaceHelper.sortCommand();
+        }
       }
-    })
+    )
   );
 
   return {
@@ -81,5 +111,5 @@ export async function activate(context: vscode.ExtensionContext) {
 
 // This method is called when your extension is deactivated
 export function deactivate() {
-  /* TODO document why this function 'deactivate' is empty */
+  // Clean up resources
 }
