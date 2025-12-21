@@ -221,7 +221,7 @@
     "typescript": "^5.3.3"
   },
   "dependencies": {
-    "execa": "^9.6.0",
+    "execa": "^9.6.1",
     "find-up": "^7.0.0",
     "fs-extra": "^11.3.0",
     "natural-orderby": "^5.0.0",
